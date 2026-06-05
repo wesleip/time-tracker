@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ui/ProtectedRoute";
 import { Dashboard } from "./pages/Dashboard";
+import { TimeLog } from "./pages/TimeLog";
 import { Projects } from "./pages/Projects";
 import { MonthlyReportPage } from "./pages/MonthlyReport";
 import { WeeklyReportPage } from "./pages/WeeklyReport";
@@ -20,6 +21,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/registrar"
+            element={
+              <ProtectedRoute>
+                <TimeLog />
               </ProtectedRoute>
             }
           />

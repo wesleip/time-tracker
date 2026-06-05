@@ -1,139 +1,125 @@
-import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Layout } from "../components/layout/Layout";
+import { Card } from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
 import { StatCard } from "../components/dashboard/StatCard";
-import { TimeEntryList } from "../components/dashboard/TimeEntryList";
-import { TimeEntryForm } from "../components/dashboard/TimeEntryForm";
-import { Button } from "../components/ui/Button";
-import { Input } from "../components/ui/Input";
-import { useDailyReport, useDeleteEntry, useEntries } from "../hooks/useEntries";
-import { useProjects } from "../hooks/useProjects";
-import type { TimeEntryWithProject } from "../types";
+import { useDailyReport, useMonthlyReport, useWeeklyReport } from "../hooks/useEntries";
 
 const today = () => new Date().toISOString().split("T")[0];
+const currentMonth = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+};
 
 export function Dashboard() {
-  const [date, setDate] = useState(today());
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<TimeEntryWithProject | null>(null);
-  const [search, setSearch] = useState("");
+  const todayStr = today();
+  const monthStr = currentMonth();
 
-  const { data: report, isLoading, isError } = useDailyReport(date);
-  const { data: projects } = useProjects();
-  const { data: entries } = useEntries(date);
-  const deleteEntry = useDeleteEntry();
+  const { data: dailyReport } = useDailyReport(todayStr);
+  const { data: weeklyReport } = useWeeklyReport(todayStr);
+  const { data: monthlyReport } = useMonthlyReport(monthStr);
 
-  const projectMap = new Map(
-    (projects ?? []).map((p) => [p.id, { name: p.name, color: p.color }])
-  );
+  const projectTotals = monthlyReport?.days
+    .flatMap((d) => d.projects)
+    .reduce<Record<string, { name: string; color: string; hours: number }>>((acc, p) => {
+      if (!acc[p.projectId]) {
+        acc[p.projectId] = { name: p.projectName, color: p.projectColor, hours: 0 };
+      }
+      acc[p.projectId].hours += p.totalHours;
+      return acc;
+    }, {});
 
-  const filteredEntries = useMemo(() => {
-    const list = entries ?? [];
-    if (!search.trim()) return list;
-    const q = search.toLowerCase();
-    return list.filter(
-      (e) =>
-        e.description?.toLowerCase().includes(q) ||
-        e.projectName.toLowerCase().includes(q)
-    );
-  }, [entries, search]);
+  const sortedProjects = Object.values(projectTotals ?? {}).sort((a, b) => b.hours - a.hours);
 
-  function handleDelete(id: string) {
-    deleteEntry.mutate(id);
-  }
-
-  function handleEdit(entry: TimeEntryWithProject) {
-    setEditingEntry(entry);
-    setFormOpen(true);
-  }
-
-  function handleNew() {
-    setEditingEntry(null);
-    setFormOpen(true);
-  }
-
-  function handleSaved() {
-    setFormOpen(false);
-    setEditingEntry(null);
-  }
-
-  function changeDay(delta: number) {
-    const d = new Date(date + "T12:00:00");
-    d.setDate(d.getDate() + delta);
-    setDate(d.toISOString().split("T")[0]);
-  }
-
-  const isToday = date === today();
+  const recentDays = [...(monthlyReport?.days ?? [])]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5);
 
   return (
     <Layout title="Dashboard">
-      <div className="p-4 md:p-6 space-y-6">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <Button variant="secondary" onClick={() => changeDay(-1)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
-            </Button>
-            <div className="text-center">
-              <p className="text-sm font-medium text-text-primary">
-                {new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
-              </p>
-              {!isToday && (
-                <button
-                  className="text-xs text-primary-500 hover:text-primary-600 cursor-pointer"
-                  onClick={() => setDate(today())}
-                >
-                  Voltar para hoje
-                </button>
-              )}
-            </div>
-            <Button variant="secondary" onClick={() => changeDay(1)} disabled={isToday}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
-            </Button>
-          </div>
-          <Button onClick={handleNew}>+ Novo Registro</Button>
-        </div>
+      <div className="p-4 md:p-6 space-y-8">
 
-        {isError && (
-          <p className="text-sm text-error">Erro ao carregar dados. Tente novamente.</p>
-        )}
-
-        {isLoading && !isError && (
-          <p className="text-text-muted text-sm">Carregando...</p>
-        )}
-
-        {report && (
+        {/* Stat cards */}
+        <div className="grid gap-4 sm:grid-cols-3">
           <StatCard
-            title={`Total de horas — ${new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long" })}`}
-            hours={report.totalHours}
+            title="Hoje"
+            hours={dailyReport?.totalHours ?? 0}
             bgColor="bg-[#f3f7f5]"
             borderColor="#7fa391"
           />
-        )}
-
-        <div className="max-w-xs">
-          <Input
-            label=""
-            placeholder="Buscar registros..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="!py-1.5"
+          <StatCard
+            title="Esta semana"
+            hours={weeklyReport?.totalHours ?? 0}
+            bgColor="bg-[#f5f7fa]"
+            borderColor="#8294a5"
+          />
+          <StatCard
+            title="Este mês"
+            hours={monthlyReport?.totalHours ?? 0}
+            bgColor="bg-[#faf6ef]"
+            borderColor="#d2b97d"
           />
         </div>
 
-        <TimeEntryList
-          entries={filteredEntries}
-          projects={projectMap}
-          onDelete={handleDelete}
-          onEdit={handleEdit}
-        />
+        {/* Projects this month */}
+        <section>
+          <h2 className="text-sm font-medium text-text-secondary mb-3">Projetos este mês</h2>
+          {sortedProjects.length === 0 ? (
+            <Card className="p-6 text-center">
+              <p className="text-text-muted text-sm">Nenhum registro este mês.</p>
+              <Link
+                to="/registrar"
+                className="inline-block mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Fazer primeiro registro →
+              </Link>
+            </Card>
+          ) : (
+            <Card className="divide-y divide-primary-100">
+              {sortedProjects.map((p) => (
+                <div key={p.name} className="flex items-center justify-between px-4 py-3">
+                  <Badge color={p.color}>{p.name}</Badge>
+                  <span className="text-sm font-medium text-text-primary">
+                    {p.hours.toFixed(1)}h
+                  </span>
+                </div>
+              ))}
+            </Card>
+          )}
+        </section>
 
-        <TimeEntryForm
-          key={editingEntry?.id || "new"}
-          date={date}
-          entry={editingEntry}
-          open={formOpen}
-          onClose={() => { setFormOpen(false); setEditingEntry(null); }}
-          onSaved={handleSaved}
-        />
+        {/* Recent days */}
+        {recentDays.length > 0 && (
+          <section>
+            <h2 className="text-sm font-medium text-text-secondary mb-3">Últimos dias</h2>
+            <div className="space-y-2">
+              {recentDays.map((day) => (
+                <Card key={day.date} className="px-4 py-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-text-primary">
+                      {new Date(day.date + "T12:00:00").toLocaleDateString("pt-BR", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </span>
+                    <span className="text-sm font-semibold text-text-primary">
+                      {day.totalHours.toFixed(1)}h
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {day.projects.map((p) => (
+                      <Badge key={p.projectId} color={p.projectColor}>
+                        {p.projectName}
+                      </Badge>
+                    ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
+
       </div>
     </Layout>
   );
