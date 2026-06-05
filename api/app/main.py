@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.routes import entries_router, projects_router, reports_router
+from app.api.routes import auth_router, entries_router, projects_router, reports_router
 from app.core.config import settings
 import logging
 
@@ -35,6 +35,7 @@ def create_app() -> FastAPI:
     def health():
         return {"status": "ok"}
 
+    app.include_router(auth_router)
     app.include_router(projects_router)
     app.include_router(entries_router)
     app.include_router(reports_router)
