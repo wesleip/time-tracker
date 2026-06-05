@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.4.0 (2026-06-05)
+
+### Auth
+
+- Autenticação multi-usuário com JWT (PyJWT + passlib/bcrypt)
+- Endpoints: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
+- Isolamento de dados por usuário: projetos e registros são visíveis apenas ao dono
+- Frontend: AuthContext, páginas Login e Register, rotas protegidas com `ProtectedRoute`
+- Token JWT armazenado em localStorage, enviado via Bearer em todas as requests
+- Logout no sidebar com redirecionamento para login
+
+### Backend
+
+- Novo endpoint `GET /api/reports/weekly?report_date=YYYY-MM-DD`
+- Fix timezone: filtro de registros por data agora é timezone-aware (America/Sao_Paulo)
+- `EntryRepository.monthly_summary` → `period_summary` (reutilizado pelo relatório semanal)
+- Adicionado `user_id` no modelo `Project` (FK → users)
+- Migração Alembic: tabela `users` + `projects.user_id`
+
+### Frontend
+
+- Sidebar responsiva com menu hamburger em mobile e overlay
+- Error states (`isError`) em Dashboard, Projetos e Relatório Mensal
+- Confirmação de dois passos ao excluir projeto (cascade-delete)
+- Busca/filtro client-side em Dashboard e Projetos
+- Página Semana com navegação por semana (segunda–domingo)
+- Componente `Select` com suporte a `placeholder`; formulários unificados usando `Select`
+- Rota `/semana` adicionada na sidebar e no `App.tsx`
+
+### Testes
+
+- 18 testes pytest cobrindo: auth, isolamento de usuários, CRUD de projetos, CRUD de registros
+- `conftest.py` com SQLite in-memory (StaticPool) e fixture `auth_headers`
+- `requirements-dev.txt` com pytest + httpx
+
+### Deps
+
+- Adicionado: PyJWT 2.9.0, passlib 1.7.4, bcrypt 4.0.1
+- bcrypt fixado em `<4.1.0` por incompatibilidade com passlib 1.7.4
+
 ## 0.3.0 (2025-06-05)
 
 ### Backend
