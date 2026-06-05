@@ -1,0 +1,25 @@
+{$DOMAIN} {
+    reverse_proxy frontend:80
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-XSS-Protection "1; mode=block"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+        -Server
+    }
+
+    # Access log
+    log {
+        output file /data/access.log {
+            roll_size 10mb
+            roll_keep 7
+        }
+        format json
+    }
+
+    encode gzip
+}

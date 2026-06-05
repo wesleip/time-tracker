@@ -3,13 +3,13 @@ services:
     image: postgres:16-alpine
     container_name: time-tracker-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: time_tracker
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-time_tracker}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -30,13 +30,14 @@ services:
       dockerfile: Dockerfile
     image: time-tracker-api:latest
     container_name: time-tracker-api
-    ports:
-      - "3001:3001"
     restart: unless-stopped
     environment:
       TZ: America/Sao_Paulo
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/time_tracker
-      CORS_ORIGINS: http://localhost:5173,http://localhost:8080
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-10080}
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}
+      DEBUG: ${DEBUG:-false}
     depends_on:
       db:
         condition: service_healthy
@@ -59,8 +60,6 @@ services:
       dockerfile: Dockerfile
     image: time-tracker-frontend:latest
     container_name: time-tracker-frontend
-    ports:
-      - "8080:80"
     restart: unless-stopped
     depends_on:
       api:
@@ -86,6 +85,35 @@ services:
       - CHOWN
       - DAC_OVERRIDE
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: time-tracker-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is required}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    networks:
+      - time-tracker-net
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
 networks:
   time-tracker-net:
     name: time-tracker-network
@@ -93,3 +121,5 @@ networks:
 
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:

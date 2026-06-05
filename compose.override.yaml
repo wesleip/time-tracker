@@ -1,0 +1,13 @@
+# Dev overrides — merged automatically by `docker compose up`
+# Exposes api and frontend ports for local access without Caddy.
+services:
+  api:
+    ports:
+      - "3001:3001"
+    environment:
+      CORS_ORIGINS: "http://localhost:5173,http://localhost:8080"
+      DEBUG: "true"
+
+  frontend:
+    ports:
+      - "8080:80"
