@@ -1,3 +1,9 @@
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -31,6 +37,19 @@ export interface DailySummaryItem {
 }
 
 export interface DailyReport {
+  date: string;
+  totalHours: number;
+  projects: DailySummaryItem[];
+}
+
+export interface WeeklyReport {
+  weekStart: string;
+  weekEnd: string;
+  totalHours: number;
+  days: WeeklyReportDay[];
+}
+
+export interface WeeklyReportDay {
   date: string;
   totalHours: number;
   projects: DailySummaryItem[];
