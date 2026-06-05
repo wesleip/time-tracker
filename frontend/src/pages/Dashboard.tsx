@@ -1,0 +1,111 @@
+import { useState } from "react";
+import { Layout } from "../components/layout/Layout";
+import { StatCard } from "../components/dashboard/StatCard";
+import { TimeEntryList } from "../components/dashboard/TimeEntryList";
+import { TimeEntryForm } from "../components/dashboard/TimeEntryForm";
+import { Button } from "../components/ui/Button";
+import { useDailyReport, useDeleteEntry, useEntries } from "../hooks/useEntries";
+import { useProjects } from "../hooks/useProjects";
+import type { TimeEntryWithProject } from "../types";
+
+const today = () => new Date().toISOString().split("T")[0];
+
+export function Dashboard() {
+  const [date, setDate] = useState(today());
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<TimeEntryWithProject | null>(null);
+
+  const { data: report, isLoading } = useDailyReport(date);
+  const { data: projects } = useProjects();
+  const { data: entries } = useEntries(date);
+  const deleteEntry = useDeleteEntry();
+
+  const projectMap = new Map(
+    (projects ?? []).map((p) => [p.id, { name: p.name, color: p.color }])
+  );
+
+  function handleDelete(id: string) {
+    deleteEntry.mutate(id);
+  }
+
+  function handleEdit(entry: TimeEntryWithProject) {
+    setEditingEntry(entry);
+    setFormOpen(true);
+  }
+
+  function handleNew() {
+    setEditingEntry(null);
+    setFormOpen(true);
+  }
+
+  function handleSaved() {
+    setFormOpen(false);
+    setEditingEntry(null);
+  }
+
+  function changeDay(delta: number) {
+    const d = new Date(date + "T12:00:00");
+    d.setDate(d.getDate() + delta);
+    setDate(d.toISOString().split("T")[0]);
+  }
+
+  const isToday = date === today();
+
+  return (
+    <Layout title="Dashboard">
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" onClick={() => changeDay(-1)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
+            </Button>
+            <div className="text-center">
+              <p className="text-sm font-medium text-text-primary">
+                {new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
+              </p>
+              {!isToday && (
+                <button
+                  className="text-xs text-primary-500 hover:text-primary-600 cursor-pointer"
+                  onClick={() => setDate(today())}
+                >
+                  Voltar para hoje
+                </button>
+              )}
+            </div>
+            <Button variant="secondary" onClick={() => changeDay(1)} disabled={isToday}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
+            </Button>
+          </div>
+          <Button onClick={handleNew}>+ Novo Registro</Button>
+        </div>
+
+        {report && (
+          <StatCard
+            title={`Total de horas - ${new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long" })}`}
+            hours={report.totalHours}
+            bgColor="bg-[#f3f7f5]"
+            borderColor="#7fa391"
+          />
+        )}
+
+        {isLoading && <p className="text-text-muted text-sm">Carregando...</p>}
+
+        <TimeEntryList
+          entries={entries ?? []}
+          projects={projectMap}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+
+        <TimeEntryForm
+          key={editingEntry?.id || 'new'}
+          date={date}
+          entry={editingEntry}
+          open={formOpen}
+          onClose={() => { setFormOpen(false); setEditingEntry(null); }}
+          onSaved={handleSaved}
+        />
+      </div>
+    </Layout>
+  );
+}
