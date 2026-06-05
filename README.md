@@ -21,7 +21,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, React Router v7, TanStack Query v5, React Hook Form, Zod, Axios |
 | **Backend** | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0, Alembic, Uvicorn, PyJWT, passlib |
 | **Banco** | PostgreSQL 16 |
-| **Infra** | Docker Compose, Nginx, multi-stage builds |
+| **Infra** | Docker Compose, Caddy, Nginx, multi-stage builds |
 
 ## Estrutura do Projeto
 
@@ -37,7 +37,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 │   │   ├── types/             # Interfaces TypeScript
 │   │   └── utils/             # Formatação de datas (pt-BR)
 │   ├── Dockerfile             # node:22-alpine → nginx:1.28-alpine
-│   ├── nginx.conf             # SPA routing, gzip, API proxy
+│   ├── nginx.conf             # SPA routing, gzip, rate limiting, real-IP via Caddy
 │   ├── vite.config.ts         # Plugins React + Tailwind, proxy /api
 │   └── package.json
 ├── api/                       # FastAPI + Python
@@ -63,7 +63,10 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 ├── REQUIREMENTS.md
 ├── TASKS.md
 ├── CHANGELOG.md
-└── compose.yaml               # Orquestração (db, api, frontend)
+├── compose.yaml               # Orquestração de produção (db, api, frontend, caddy)
+├── compose.override.yaml      # Overrides para dev local (expõe portas 8080/3001)
+├── Caddyfile                  # Reverse proxy: HTTPS automático + security headers
+└── .env.example               # Template de variáveis de ambiente
 ```
 
 ## API
@@ -112,19 +115,69 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 | `GET` | `/api/reports/weekly` | `report_date` | Resumo semanal (seg–dom) |
 | `GET` | `/api/reports/monthly` | `month` | Relatório mensal por dia e projeto |
 
-## Desenvolvimento
+## Deploy (produção)
 
-### Com Docker Compose (recomendado)
+### Pré-requisitos
+
+- Docker + Docker Compose v2
+- Domínio apontando para o IP do servidor
+- Portas 80 e 443 abertas no firewall
+
+### Subindo
 
 ```bash
-docker compose up --build
+cp .env.example .env
+# Editar .env: DOMAIN, POSTGRES_PASSWORD, DATABASE_URL, JWT_SECRET, CORS_ORIGINS
+
+docker compose -f compose.yaml up -d --build
 ```
 
-| Serviço | Porta | Descrição |
-|---------|-------|-----------|
-| frontend | `http://localhost:8080` | Nginx servindo o build do React |
-| api | `http://localhost:3001` | FastAPI + Uvicorn |
-| db | `5432` (interno) | PostgreSQL |
+O Caddy obtém o certificado TLS automaticamente via Let's Encrypt na primeira inicialização.
+
+| Serviço | Acesso | Descrição |
+|---------|--------|-----------|
+| caddy | `https://seu.dominio.com` | Único ponto de entrada público (80/443) |
+| frontend | interno | Nginx servindo o build do React |
+| api | interno | FastAPI + Uvicorn |
+| db | interno | PostgreSQL (não exposto ao host) |
+
+### Segurança aplicada
+
+| Camada | Recurso |
+|--------|---------|
+| Caddy | HTTPS automático (Let's Encrypt), HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy |
+| Nginx | Rate limiting 60 req/min por IP real (burst 20), 429 no excesso, `server_tokens off` |
+| API | JWT obrigatório em todas as rotas, dados isolados por usuário |
+| Compose | Secrets via `.env` (`:?` falha rápida se ausente), `no-new-privileges`, `cap_drop: ALL` |
+
+### Gerando secrets
+
+```bash
+# JWT_SECRET
+python3 -c "import secrets; print(secrets.token_hex(32))"
+
+# POSTGRES_PASSWORD
+python3 -c "import secrets; print(secrets.token_urlsafe(24))"
+```
+
+---
+
+## Desenvolvimento local
+
+### Docker Compose (dev)
+
+```bash
+cp .env.example .env
+# Mínimo: definir POSTGRES_PASSWORD, JWT_SECRET, DATABASE_URL
+# CORS_ORIGINS e DEBUG são sobrescritos pelo override
+
+docker compose up --build   # merge automático com compose.override.yaml
+```
+
+| Serviço | Porta |
+|---------|-------|
+| frontend | `http://localhost:8080` |
+| api | `http://localhost:3001` |
 
 ### Frontend standalone
 
@@ -132,7 +185,6 @@ docker compose up --build
 cd frontend
 npm install
 npm run dev     # → http://localhost:5173 (proxy /api → localhost:3001)
-npm run build
 ```
 
 ### Backend standalone
@@ -149,7 +201,7 @@ python run.py          # → http://localhost:3001
 
 ```bash
 cd api
-pip install pytest httpx   # ou: pip install -r requirements-dev.txt
+pip install -r requirements-dev.txt
 pytest tests/ -v
 ```
 
