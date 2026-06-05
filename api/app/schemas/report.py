@@ -21,6 +21,13 @@ class MonthlyReportItem(BaseModel):
     projects: list[DailySummaryItem]
 
 
+class WeeklyReport(BaseModel):
+    week_start: str
+    week_end: str
+    total_hours: float
+    days: list[MonthlyReportItem]
+
+
 class MonthlyReport(BaseModel):
     month: str
     total_hours: float

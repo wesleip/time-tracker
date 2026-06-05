@@ -1,5 +1,5 @@
 import api from "./client";
-import type { TimeEntryWithProject, DailyReport, MonthlyReport } from "../types";
+import type { TimeEntryWithProject, DailyReport, WeeklyReport, MonthlyReport } from "../types";
 
 export async function fetchEntries(date?: string, projectId?: string): Promise<TimeEntryWithProject[]> {
   const params: Record<string, string> = {};
@@ -33,6 +33,11 @@ export async function deleteEntry(id: string): Promise<void> {
 
 export async function fetchDailyReport(date: string): Promise<DailyReport> {
   const { data } = await api.get<DailyReport>("/reports/daily", { params: { report_date: date } });
+  return data;
+}
+
+export async function fetchWeeklyReport(date: string): Promise<WeeklyReport> {
+  const { data } = await api.get<WeeklyReport>("/reports/weekly", { params: { report_date: date } });
   return data;
 }
 
