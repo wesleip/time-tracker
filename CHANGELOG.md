@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.5.0 (2026-06-05)
+
+### Dashboard
+
+- Dashboard (`/`) refeito como visão geral: stat cards hoje/semana/mês, projetos do mês ordenados por horas, últimos 5 dias com registros
+- Página `TimeLog` (`/registrar`) criada com o fluxo anterior de apontamento diário
+- Sidebar: novo item "Registrar" com ícone de relógio
+- Empty state no Dashboard com link direto para `/registrar`
+
+### Produção
+
+- `compose.yaml`: secrets movidos para `.env` (falha rápida com `:?` se ausente); portas de api e frontend removidas do host
+- `compose.override.yaml`: overrides de dev (expõe 8080/3001); merged automaticamente por `docker compose up`
+- `Caddyfile`: reverse proxy com HTTPS automático (Let's Encrypt), security headers (HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy), log de acesso rotativo
+- `nginx.conf`: config completa com `limit_req_zone` (60 req/min por IP real, burst 20, 429 no excesso), `set_real_ip_from` para ler IP real via `X-Forwarded-For` do Caddy, `server_tokens off`
+- `.env.example`: template completo com instruções de geração de secrets
+- `.gitignore`: `.env` adicionado
+
 ## 0.4.0 (2026-06-05)
 
 ### Auth
