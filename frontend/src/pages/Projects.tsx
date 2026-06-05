@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,6 +6,7 @@ import { Layout } from "../components/layout/Layout";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
+import { Select } from "../components/ui/Select";
 import { Modal } from "../components/ui/Modal";
 import { Badge } from "../components/ui/Badge";
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "../hooks/useProjects";
@@ -30,18 +31,26 @@ const colorOptions = [
 ];
 
 export function Projects() {
-  const { data: projects, isLoading } = useProjects();
+  const { data: projects, isLoading, isError } = useProjects();
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(projectSchema),
     defaultValues: { name: "", color: "#6366f1", description: "" },
   });
+
+  const filteredProjects = useMemo(() => {
+    const list = projects ?? [];
+    if (!search.trim()) return list;
+    return list.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+  }, [projects, search]);
 
   function handleNew() {
     setEditingProject(null);
@@ -64,21 +73,45 @@ export function Projects() {
     setModalOpen(false);
   }
 
-  async function handleDelete(id: string) {
+  async function handleConfirmDelete(id: string) {
     await deleteProject.mutateAsync(id);
+    setConfirmDeleteId(null);
   }
 
   return (
     <Layout title="Projetos">
-      <div className="p-6 space-y-6">
-        <div className="flex justify-end">
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="max-w-xs flex-1">
+            <Input
+              label=""
+              placeholder="Buscar projetos..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="!py-1.5"
+            />
+          </div>
           <Button onClick={handleNew}>+ Novo Projeto</Button>
         </div>
 
-        {isLoading && <p className="text-text-muted text-sm">Carregando...</p>}
+        {isError && (
+          <p className="text-sm text-error">Erro ao carregar projetos. Tente novamente.</p>
+        )}
+
+        {isLoading && !isError && (
+          <p className="text-text-muted text-sm">Carregando...</p>
+        )}
+
+        {!isLoading && !isError && filteredProjects.length === 0 && (
+          <Card className="p-8 text-center">
+            <p className="text-text-muted text-sm">
+              {search ? "Nenhum projeto encontrado." : "Nenhum projeto cadastrado."}
+            </p>
+          </Card>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(projects ?? []).map((project) => (
+          {filteredProjects.map((project) => (
             <Card key={project.id} hover className="p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <Badge color={project.color}>{project.name}</Badge>
@@ -93,9 +126,20 @@ export function Projects() {
                 <Button variant="secondary" className="!px-3 !py-1 text-xs" onClick={() => handleEdit(project)}>
                   Editar
                 </Button>
-                <Button variant="danger" className="!px-3 !py-1 text-xs" onClick={() => handleDelete(project.id)}>
-                  Excluir
-                </Button>
+                {confirmDeleteId === project.id ? (
+                  <>
+                    <Button variant="danger" className="!px-3 !py-1 text-xs" onClick={() => handleConfirmDelete(project.id)}>
+                      Confirmar
+                    </Button>
+                    <Button variant="secondary" className="!px-3 !py-1 text-xs" onClick={() => setConfirmDeleteId(null)}>
+                      Cancelar
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="danger" className="!px-3 !py-1 text-xs" onClick={() => setConfirmDeleteId(project.id)}>
+                    Excluir
+                  </Button>
+                )}
               </div>
             </Card>
           ))}
@@ -111,24 +155,16 @@ export function Projects() {
               />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1">Cor</label>
-              <select
-                className="w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm"
-                {...register("color")}
-              >
-                {colorOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Input
-                label="Descrição"
-                placeholder="Descrição opcional"
-                {...register("description")}
-              />
-            </div>
+            <Select
+              label="Cor"
+              options={colorOptions}
+              {...register("color")}
+            />
+            <Input
+              label="Descrição"
+              placeholder="Descrição opcional"
+              {...register("description")}
+            />
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="secondary" type="button" onClick={() => setModalOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={isSubmitting}>

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import { Select } from "../ui/Select";
 import { Modal } from "../ui/Modal";
 import { useProjects } from "../../hooks/useProjects";
 import { useCreateEntry, useUpdateEntry } from "../../hooks/useEntries";
@@ -54,20 +55,18 @@ export function TimeEntryForm({ date, entry, open, onClose, onSaved }: TimeEntry
     onClose();
   }
 
+  const projectOptions = (projects ?? []).map((p) => ({ value: p.id, label: p.name }));
+
   return (
     <Modal open={open} title={entry ? "Editar Registro" : "Novo Registro"} onClose={onClose}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-1">Projeto</label>
-          <select
-            className="w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm"
+          <Select
+            label="Projeto"
+            options={projectOptions}
+            placeholder="Selecione um projeto"
             {...register("projectId")}
-          >
-            <option value="">Selecione um projeto</option>
-            {(projects ?? []).map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+          />
           {errors.projectId && <p className="text-red-500 text-xs mt-1">{errors.projectId.message}</p>}
         </div>
         <div>

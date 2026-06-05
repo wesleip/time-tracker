@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
@@ -9,11 +9,15 @@ interface LayoutProps {
 }
 
 export function Layout({ title, children, headerExtra }: LayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header title={title}>{headerExtra}</Header>
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header title={title} onMenuClick={() => setSidebarOpen(true)}>
+          {headerExtra}
+        </Header>
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>

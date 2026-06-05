@@ -10,7 +10,7 @@ export function MonthlyReportPage() {
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const [month, setMonth] = useState(currentMonth);
-  const { data: report, isLoading } = useMonthlyReport(month);
+  const { data: report, isLoading, isError } = useMonthlyReport(month);
 
   function changeMonth(delta: number) {
     const [y, m] = month.split("-").map(Number);
@@ -20,20 +20,24 @@ export function MonthlyReportPage() {
 
   return (
     <Layout title="Relatório Mensal">
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="secondary" onClick={() => changeMonth(-1)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
-            </Button>
-            <span className="text-lg font-medium text-text-primary">{formatMonthYear(month)}</span>
-            <Button variant="secondary" onClick={() => changeMonth(1)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
-            </Button>
-          </div>
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" onClick={() => changeMonth(-1)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
+          </Button>
+          <span className="text-lg font-medium text-text-primary">{formatMonthYear(month)}</span>
+          <Button variant="secondary" onClick={() => changeMonth(1)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
+          </Button>
         </div>
 
-        {isLoading && <p className="text-text-muted text-sm">Carregando...</p>}
+        {isError && (
+          <p className="text-sm text-error">Erro ao carregar relatório. Tente novamente.</p>
+        )}
+
+        {isLoading && !isError && (
+          <p className="text-text-muted text-sm">Carregando...</p>
+        )}
 
         {report && (
           <>
@@ -62,7 +66,7 @@ export function MonthlyReportPage() {
                   </div>
                 </Card>
               ))}
-              {report.days.length === 0 && (
+              {!isLoading && report.days.length === 0 && (
                 <Card className="p-8 text-center">
                   <p className="text-text-muted text-sm">Nenhum registro neste mês.</p>
                 </Card>

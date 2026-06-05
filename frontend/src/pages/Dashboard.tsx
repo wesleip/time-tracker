@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Layout } from "../components/layout/Layout";
 import { StatCard } from "../components/dashboard/StatCard";
 import { TimeEntryList } from "../components/dashboard/TimeEntryList";
 import { TimeEntryForm } from "../components/dashboard/TimeEntryForm";
 import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
 import { useDailyReport, useDeleteEntry, useEntries } from "../hooks/useEntries";
 import { useProjects } from "../hooks/useProjects";
 import type { TimeEntryWithProject } from "../types";
@@ -14,8 +15,9 @@ export function Dashboard() {
   const [date, setDate] = useState(today());
   const [formOpen, setFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<TimeEntryWithProject | null>(null);
+  const [search, setSearch] = useState("");
 
-  const { data: report, isLoading } = useDailyReport(date);
+  const { data: report, isLoading, isError } = useDailyReport(date);
   const { data: projects } = useProjects();
   const { data: entries } = useEntries(date);
   const deleteEntry = useDeleteEntry();
@@ -23,6 +25,17 @@ export function Dashboard() {
   const projectMap = new Map(
     (projects ?? []).map((p) => [p.id, { name: p.name, color: p.color }])
   );
+
+  const filteredEntries = useMemo(() => {
+    const list = entries ?? [];
+    if (!search.trim()) return list;
+    const q = search.toLowerCase();
+    return list.filter(
+      (e) =>
+        e.description?.toLowerCase().includes(q) ||
+        e.projectName.toLowerCase().includes(q)
+    );
+  }, [entries, search]);
 
   function handleDelete(id: string) {
     deleteEntry.mutate(id);
@@ -53,8 +66,8 @@ export function Dashboard() {
 
   return (
     <Layout title="Dashboard">
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <Button variant="secondary" onClick={() => changeDay(-1)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
@@ -79,26 +92,42 @@ export function Dashboard() {
           <Button onClick={handleNew}>+ Novo Registro</Button>
         </div>
 
+        {isError && (
+          <p className="text-sm text-error">Erro ao carregar dados. Tente novamente.</p>
+        )}
+
+        {isLoading && !isError && (
+          <p className="text-text-muted text-sm">Carregando...</p>
+        )}
+
         {report && (
           <StatCard
-            title={`Total de horas - ${new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long" })}`}
+            title={`Total de horas — ${new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long" })}`}
             hours={report.totalHours}
             bgColor="bg-[#f3f7f5]"
             borderColor="#7fa391"
           />
         )}
 
-        {isLoading && <p className="text-text-muted text-sm">Carregando...</p>}
+        <div className="max-w-xs">
+          <Input
+            label=""
+            placeholder="Buscar registros..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="!py-1.5"
+          />
+        </div>
 
         <TimeEntryList
-          entries={entries ?? []}
+          entries={filteredEntries}
           projects={projectMap}
           onDelete={handleDelete}
           onEdit={handleEdit}
         />
 
         <TimeEntryForm
-          key={editingEntry?.id || 'new'}
+          key={editingEntry?.id || "new"}
           date={date}
           entry={editingEntry}
           open={formOpen}
