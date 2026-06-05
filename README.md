@@ -1,23 +1,25 @@
 # Time Tracker
 
-Aplicação web para controle de horas trabalhadas em projetos e tarefas.
+Aplicação web para controle de horas trabalhadas em projetos.
 
-Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, consultores, analistas) podem registrar de forma simples e rápida quanto tempo foi gasto em cada atividade, consultar totais diários e gerar relatórios mensais.
+Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, consultores, analistas) podem registrar de forma simples e rápida quanto tempo foi gasto em cada atividade, consultar totais diários, semanais e mensais.
 
 ## Funcionalidades
 
-- **Projetos** — CRUD completo com identificação visual por cores
-- **Registro de horas** — Vincular horas a projetos com descrição e data
-- **Dashboard diário** — Navegação entre dias com total de horas e lista de registros
+- **Autenticação** — Registro e login multi-usuário com JWT; dados isolados por usuário
+- **Dashboard** — Visão geral com totais de hoje, semana e mês; projetos e dias recentes
+- **Registrar** — Apontamento diário com navegação entre dias, busca e CRUD de registros
+- **Projetos** — CRUD com identificação visual por cores e busca
+- **Relatório semanal** — Breakdown segunda–domingo com total por projeto
 - **Relatório mensal** — Visão agregada por dia e por projeto
-- **API REST** — 12 endpoints documentados com validação Pydantic
+- **API REST** — 15 endpoints com autenticação JWT e validação Pydantic
 
 ## Stack
 
 | Camada | Tecnologias |
 |--------|-------------|
-| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, React Router, TanStack Query, React Hook Form, Zod, Axios |
-| **Backend** | Python 3.12, FastAPI, Pydantic, SQLAlchemy 2.0, Alembic, Uvicorn |
+| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, React Router v7, TanStack Query v5, React Hook Form, Zod, Axios |
+| **Backend** | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0, Alembic, Uvicorn, PyJWT, passlib |
 | **Banco** | PostgreSQL 16 |
 | **Infra** | Docker Compose, Nginx, multi-stage builds |
 
@@ -28,9 +30,10 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 ├── frontend/                  # React + TypeScript + Vite
 │   ├── src/
 │   │   ├── components/        # UI, layout e dashboard
+│   │   ├── contexts/          # AuthContext (JWT + user state)
 │   │   ├── hooks/             # TanStack Query hooks
-│   │   ├── pages/             # Dashboard, Projetos, Relatório Mensal
-│   │   ├── services/          # API client (Axios)
+│   │   ├── pages/             # Dashboard, TimeLog, Projetos, Semana, Relatório, Login, Register
+│   │   ├── services/          # API client (Axios) com camelCase ↔ snake_case
 │   │   ├── types/             # Interfaces TypeScript
 │   │   └── utils/             # Formatação de datas (pt-BR)
 │   ├── Dockerfile             # node:22-alpine → nginx:1.28-alpine
@@ -39,42 +42,41 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 │   └── package.json
 ├── api/                       # FastAPI + Python
 │   ├── app/
-│   │   ├── api/routes/        # projects, entries, reports
-│   │   ├── core/              # Config (Pydantic Settings), database
-│   │   ├── models/            # SQLAlchemy ORM (Project, TimeEntry)
+│   │   ├── api/
+│   │   │   ├── deps.py        # get_current_user dependency (JWT)
+│   │   │   └── routes/        # auth, projects, entries, reports
+│   │   ├── core/              # Config (Pydantic Settings), database, security (JWT + bcrypt)
+│   │   ├── models/            # SQLAlchemy ORM (User, Project, TimeEntry)
 │   │   ├── repositories/      # Data access layer
 │   │   ├── schemas/           # Pydantic request/response
 │   │   ├── services/          # Business logic
 │   │   └── main.py            # App factory, CORS, error handlers
 │   ├── alembic/               # Database migrations
+│   ├── tests/                 # pytest (18 testes: auth, projetos, registros)
 │   ├── Dockerfile             # python:3.12-alpine
 │   ├── pyproject.toml         # Poetry dependencies
 │   └── run.py                 # Uvicorn dev runner
-├── docs/                      # Business documentation
-│   ├── api-spec.md            # REST API contract
-│   ├── business-rules.md      # Regras de negócio
-│   ├── glossary.md            # Definições de termos
-│   └── user-stories.md        # User stories
+├── docs/                      # Documentação de negócio
 ├── design-system/             # Design tokens e guia visual
-│   └── design-system.md       # Cores, tipografia, componentes, espaçamento
-├── agents/                    # Instruções para agentes de IA
-│   ├── system-prompt.md       # System prompt e regras de implementação
-│   ├── architecture-principles.md  # KISS, YAGNI, DRY, SOLID
-│   ├── security.md            # OWASP Top 10, security guidelines
-│   ├── containerization.md    # Docker best practices
-│   ├── coding-guidelines.md
-│   ├── development-rules.md
-│   ├── definition-of-done.md
-│   └── review-checklist.md
-├── ARCHITECTURE.md            # Arquitetura do sistema
-├── REQUIREMENTS.md            # Requisitos funcionais e não-funcionais
-├── WORKFLOW.md                # Fluxo de uso
-├── TASKS.md                   # Roadmap e tarefas pendentes
-├── CHANGELOG.md               # Histórico de versões
+├── agents/                    # Diretrizes para agentes de IA
+├── ARCHITECTURE.md
+├── REQUIREMENTS.md
+├── TASKS.md
+├── CHANGELOG.md
 └── compose.yaml               # Orquestração (db, api, frontend)
 ```
 
 ## API
+
+### Auth
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `POST` | `/api/auth/register` | Criar conta |
+| `POST` | `/api/auth/login` | Login — retorna JWT |
+| `GET` | `/api/auth/me` | Dados do usuário autenticado |
+
+> Todas as rotas abaixo exigem `Authorization: Bearer <token>`.
 
 ### Health
 
@@ -86,7 +88,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/projects/` | Listar todos os projetos |
+| `GET` | `/api/projects/` | Listar projetos do usuário |
 | `POST` | `/api/projects/` | Criar projeto |
 | `GET` | `/api/projects/{id}` | Buscar projeto por ID |
 | `PUT` | `/api/projects/{id}` | Atualizar projeto |
@@ -96,7 +98,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 
 | Método | Rota | Query Params | Descrição |
 |--------|------|-------------|-----------|
-| `GET` | `/api/entries/` | `date`, `project_id` | Listar registros (filtros opcionais) |
+| `GET` | `/api/entries/` | `date`, `project_id` | Listar registros |
 | `POST` | `/api/entries/` | — | Criar registro |
 | `GET` | `/api/entries/{id}` | — | Buscar registro por ID |
 | `PUT` | `/api/entries/{id}` | — | Atualizar registro |
@@ -106,8 +108,9 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 
 | Método | Rota | Query Params | Descrição |
 |--------|------|-------------|-----------|
-| `GET` | `/api/reports/daily` | `report_date` | Resumo diário com totais por projeto |
-| `GET` | `/api/reports/monthly` | `month` | Relatório mensal com breakdown por dia e projeto |
+| `GET` | `/api/reports/daily` | `report_date` | Resumo diário por projeto |
+| `GET` | `/api/reports/weekly` | `report_date` | Resumo semanal (seg–dom) |
+| `GET` | `/api/reports/monthly` | `month` | Relatório mensal por dia e projeto |
 
 ## Desenvolvimento
 
@@ -117,22 +120,19 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 docker compose up --build
 ```
 
-Isso inicia três serviços em ordem:
-
 | Serviço | Porta | Descrição |
 |---------|-------|-----------|
 | frontend | `http://localhost:8080` | Nginx servindo o build do React |
 | api | `http://localhost:3001` | FastAPI + Uvicorn |
-| db | `5432` (interno) | PostgreSQL (não exposto externamente) |
+| db | `5432` (interno) | PostgreSQL |
 
 ### Frontend standalone
 
 ```bash
 cd frontend
 npm install
-npm run dev          # → http://localhost:5173 (proxy /api → localhost:3001)
-npm run build        # Build para produção em dist/
-npm run preview      # Preview do build
+npm run dev     # → http://localhost:5173 (proxy /api → localhost:3001)
+npm run build
 ```
 
 ### Backend standalone
@@ -140,26 +140,32 @@ npm run preview      # Preview do build
 ```bash
 cd api
 poetry install
-# Configure DATABASE_URL no .env (copie de .env.example)
-alembic upgrade head # Executar migrações
-python run.py        # → http://localhost:3001 (uvicorn com reload)
+cp .env.example .env   # ajuste DATABASE_URL e JWT_SECRET
+alembic upgrade head
+python run.py          # → http://localhost:3001
+```
+
+### Testes
+
+```bash
+cd api
+pip install pytest httpx   # ou: pip install -r requirements-dev.txt
+pytest tests/ -v
 ```
 
 ## Arquitetura
 
 ### Backend
 
-Camadas organizadas do externo para o interno:
-
 ```
 Routes → Services → Repositories → Models
 ```
 
-- **Routes**: Controllers thin, delegam para services
-- **Services**: Regras de negócio, validações, tratamento de 404
-- **Repositories**: Acesso a dados via SQLAlchemy ORM
-- **Models**: Entidades SQLAlchemy com relacionamentos
-- **Schemas**: Validação e serialização via Pydantic
+- **Routes** — thin controllers, injetam `current_user` via `Depends`
+- **Services** — regras de negócio, validações, 404s
+- **Repositories** — acesso a dados via SQLAlchemy ORM, filtrados por `user_id`
+- **Models** — `User`, `Project` (FK → User), `TimeEntry` (FK → Project)
+- **Schemas** — validação e serialização Pydantic; horas validadas (0 < h ≤ 24)
 
 ### Frontend
 
@@ -167,18 +173,30 @@ Routes → Services → Repositories → Models
 Pages → Hooks (TanStack Query) → Services (Axios) → API
 ```
 
-- **Pages**: Componentes de página com estado de UI
-- **Hooks**: `useProjects`, `useEntries` com queries e mutations
-- **Services**: Funções de chamada à API com transformação camelCase ↔ snake_case
-- **Components**: UI primitives, layout, e componentes de domínio
+- **AuthContext** — estado do usuário, token em localStorage, interceptor 401
+- **Hooks** — `useProjects`, `useEntries`, `useDailyReport`, `useWeeklyReport`, `useMonthlyReport`
+- **Services** — interceptors convertem `camelCase ↔ snake_case` automaticamente
+- **Components** — primitivos (`Button`, `Card`, `Input`, `Select`, `Badge`, `Modal`) + layout + dashboard
 
 ## Banco de Dados
+
+### User
+
+| Coluna | Tipo | Restrição |
+|--------|------|-----------|
+| `id` | String(36) | PK, UUID |
+| `email` | String(255) | NOT NULL, UNIQUE |
+| `name` | String(255) | NOT NULL |
+| `password_hash` | String(255) | NOT NULL |
+| `created_at` | DateTime(tz) | default now |
+| `updated_at` | DateTime(tz) | default now, auto-update |
 
 ### Project
 
 | Coluna | Tipo | Restrição |
 |--------|------|-----------|
-| `id` | UUID | PK |
+| `id` | String(36) | PK, UUID |
+| `user_id` | String(36) | FK → users.id |
 | `name` | String(255) | NOT NULL |
 | `description` | Text | nullable |
 | `color` | String(7) | NOT NULL, default `#6366f1` |
@@ -189,8 +207,8 @@ Pages → Hooks (TanStack Query) → Services (Axios) → API
 
 | Coluna | Tipo | Restrição |
 |--------|------|-----------|
-| `id` | UUID | PK |
-| `project_id` | UUID | FK → projects.id |
+| `id` | String(36) | PK, UUID |
+| `project_id` | String(36) | FK → projects.id |
 | `description` | Text | nullable |
 | `hours` | Float | NOT NULL |
 | `date` | DateTime(tz) | NOT NULL, indexed |
@@ -199,9 +217,7 @@ Pages → Hooks (TanStack Query) → Services (Axios) → API
 
 ## Design System
 
-Paleta baseada em sage green e blue-gray, tons pastel, tipografia Inter (400, 500, 600). Interface limpa e focada em produtividade.
-
-Referência completa em `design-system/design-system.md`.
+Paleta baseada em sage green e blue-gray, tons pastel, tipografia Inter (400, 500, 600). Interface limpa e focada em produtividade. Referência completa em `design-system/design-system.md`.
 
 ## Documentação
 
@@ -209,11 +225,9 @@ Referência completa em `design-system/design-system.md`.
 |---------|----------|
 | `PROJECT.md` | Problema, público-alvo, objetivo, escopo MVP |
 | `REQUIREMENTS.md` | Requisitos funcionais e não-funcionais |
-| `ARCHITECTURE.md` | Arquitetura, conceitos de domínio, regras |
-| `WORKFLOW.md` | Fluxo de uso da aplicação |
-| `TASKS.md` | Roadmap: MVP completo, tarefas futuras |
+| `ARCHITECTURE.md` | Arquitetura e conceitos de domínio |
+| `TASKS.md` | Roadmap e tarefas pendentes |
 | `CHANGELOG.md` | Histórico de versões |
-| `docs/api-spec.md` | Contrato completo da API REST |
+| `docs/api-spec.md` | Contrato da API REST |
 | `docs/business-rules.md` | Regras de negócio |
-| `docs/glossary.md` | Definições de termos |
-| `agents/system-prompt.md` | System prompt e regras para agentes de IA |
+| `agents/system-prompt.md` | Diretrizes para agentes de IA |
