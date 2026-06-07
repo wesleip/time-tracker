@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0 (2026-06-07)
+
+### CI/CD — Geração de Imagens Docker
+
+- `docker-bake.hcl`: configuração central de build com BuildKit Bake; targets `api`, `frontend`, grupos `default` (single-arch local) e `release` (multi-arch amd64+arm64 para push ao registro)
+- `.github/workflows/ci.yml`: pipeline pytest em PRs e pushes para `main` com SQLite in-memory (sem dependência de PostgreSQL em CI)
+- `.github/workflows/build-images.yml`: build e publicação de imagens multi-arch no GHCR com estratégia de tags semânticas (`:1.2.3`, `:1.2`, `:sha-abc`, `:latest`), cache de layers via `type=gha` e jobs de API e frontend em paralelo
+- `Makefile`: comandos locais `build`, `push`, `test`, `clean`, `info` — todos delegam ao `docker buildx bake`
+- `api/Dockerfile`: OCI labels (`org.opencontainers.image.*`), build args `APP_VERSION`/`VCS_REF`/`BUILD_DATE`, `.dockerignore` expandido (exclui `tests/`, `requirements-dev.txt`, `run.py`)
+- `frontend/Dockerfile`: OCI labels, build args, `.dockerignore` expandido (exclui `dist/` local, `.vite/`, `node_modules/`)
+- `docs/docker-image-build.md`: documentação completa — arquitetura multi-stage, estratégia de tags, pipeline CI/CD, suporte multi-arch, OCI labels, segurança e guia de migração para outros registros (ECR, GCR, Docker Hub)
+
 ## 0.5.0 (2026-06-05)
 
 ### Dashboard
