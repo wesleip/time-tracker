@@ -1,7 +1,44 @@
+# Files excluded from the Docker build context for the API image.
+# Keeping the context small speeds up image builds and prevents
+# secrets or dev-only files from being copied into the image.
+
+# Secrets — never in production images
 .env
+.env.*
+
+# Python cache and compiled bytecode
 __pycache__
 *.pyc
-.DS_Store
+*.pyo
+*.pyd
+
+# Virtual environments
 .venv
+.venv/
+venv/
+
+# Build and distribution artifacts
 *.egg-info
-dist
+dist/
+build/
+
+# Test suite — not needed at runtime, reduces attack surface
+tests/
+.pytest_cache/
+requirements-dev.txt
+
+# Local dev runner — not used inside the container
+run.py
+
+# macOS metadata
+.DS_Store
+
+# Editor and IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git history
+.git
+.github

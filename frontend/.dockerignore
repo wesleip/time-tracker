@@ -1,14 +1,42 @@
+# Files excluded from the Docker build context for the Frontend image.
+# The builder stage runs `npm ci && npm run build`, so node_modules
+# and dist must NOT be excluded (npm ci recreates them inside the container).
+
+# Git history
 .git
 .gitignore
 .github
-node_modules
-dist
-coverage
+
+# Secrets
 .env
 .env.*
+.env.local
+.env.*.local
+
+# Node — will be recreated by `npm ci` inside the builder stage
+node_modules/
+
+# Pre-built dist — rebuilt fresh by `npm run build` inside the container.
+# Including a stale local dist would silently ship outdated assets.
+dist/
+
+# Test and coverage output
+coverage/
+
+# Logs
 *.log
-Dockerfile*
-docker-compose*
-compose*
-.eslintcache
-README.vite.md
+
+# macOS metadata
+.DS_Store
+
+# Editor and IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Vite cache (local only)
+.vite/
+
+# Documentation (not needed in the runtime image)
+*.md

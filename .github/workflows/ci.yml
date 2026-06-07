@@ -1,0 +1,58 @@
+# CI — Continuous Integration
+#
+# Runs on every push to main and on every pull request targeting main
+# when API source files change. Validates that the test suite passes
+# before any image build or deployment is triggered.
+#
+# Test isolation: uses SQLite in-memory (StaticPool) defined in
+# api/tests/conftest.py — no external PostgreSQL service required.
+
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["api/**"]
+  pull_request:
+    branches: ["main"]
+    paths: ["api/**"]
+
+jobs:
+  test:
+    name: Backend Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.12"]
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            api/requirements.txt
+            api/requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run tests
+        run: pytest -v --tb=short
+        env:
+          # Tests override the DB with SQLite in-memory (see conftest.py).
+          # These values are required by pydantic-settings config validation
+          # but are not used to connect to a real database during tests.
+          DATABASE_URL: "sqlite:///:memory:"
+          JWT_SECRET: "ci-only-secret-not-used-in-production"
+          CORS_ORIGINS: "http://localhost:3000"
