@@ -30,7 +30,7 @@ BUILD_DATE ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # REGISTRY: target container registry path (without image name suffix)
 # Override for your own registry: make push REGISTRY=myregistry.io/myorg/time-tracker
-REGISTRY ?= ghcr.io/your-org/time-tracker
+REGISTRY ?= ghcr.io/wesleip/time-tracker
 
 # Internal env block passed to every bake invocation
 BAKE_ENV = APP_VERSION=$(APP_VERSION) VCS_REF=$(VCS_REF) BUILD_DATE=$(BUILD_DATE) REGISTRY=$(REGISTRY)

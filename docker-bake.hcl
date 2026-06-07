@@ -21,7 +21,7 @@
 variable "REGISTRY" {
   # Base registry path. In CI this is set to ghcr.io/<org>/time-tracker.
   # For local builds the default is fine — images stay in the local daemon.
-  default = "ghcr.io/your-org/time-tracker"
+  default = "ghcr.io/wesleip/time-tracker"
 }
 
 variable "APP_VERSION" {
