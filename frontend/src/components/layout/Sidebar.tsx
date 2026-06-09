@@ -26,9 +26,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const content = (
     <aside className="w-60 bg-bg-secondary border-r border-primary-100 flex flex-col h-full">
       <div className="h-14 flex items-center gap-2 px-4 border-b border-primary-100">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-300 to-secondary-400 flex items-center justify-center text-xs font-semibold text-white">
-          TT
-        </div>
+        <img src="/logo.svg" alt="Time Tracker" className="w-8 h-8" />
         <span className="font-medium text-text-primary text-base">Time Tracker</span>
       </div>
 
