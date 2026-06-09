@@ -31,9 +31,7 @@ export function Login() {
     <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="flex items-center gap-2 mb-8 justify-center">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-300 to-secondary-400 flex items-center justify-center text-sm font-semibold text-white">
-            TT
-          </div>
+          <img src="/logo.svg" alt="Time Tracker" className="w-10 h-10" />
           <span className="text-xl font-semibold text-text-primary">Time Tracker</span>
         </div>
 
