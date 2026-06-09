@@ -38,5 +38,6 @@ class UserResponse(BaseModel):
     id: str
     email: str
     name: str
+    is_admin: bool
 
     model_config = ConfigDict(from_attributes=True)
