@@ -65,11 +65,11 @@ services:
       api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
-      interval: 30s
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:80/ || exit 1"]
+      interval: 10s
       timeout: 5s
-      start_period: 5s
-      retries: 3
+      start_period: 10s
+      retries: 5
     tmpfs:
       - /var/cache/nginx
       - /var/run
