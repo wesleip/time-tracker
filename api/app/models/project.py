@@ -23,3 +23,4 @@ class Project(Base):
 
     user = relationship("User", back_populates="projects")
     entries = relationship("TimeEntry", back_populates="project", cascade="all, delete-orphan")
+    tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
