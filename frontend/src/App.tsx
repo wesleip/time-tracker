@@ -9,6 +9,7 @@ import { MonthlyReportPage } from "./pages/MonthlyReport";
 import { WeeklyReportPage } from "./pages/WeeklyReport";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { Tasks } from "./pages/Tasks";
 import { AdminLayout } from "./pages/admin/AdminLayout";
 import { AdminOverview } from "./pages/admin/AdminOverview";
 import { AdminUsers } from "./pages/admin/AdminUsers";
@@ -59,6 +60,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <WeeklyReportPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tarefas"
+            element={
+              <ProtectedRoute>
+                <Tasks />
               </ProtectedRoute>
             }
           />

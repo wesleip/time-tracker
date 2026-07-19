@@ -14,6 +14,36 @@ export interface Project {
   updatedAt: string;
 }
 
+export interface Section {
+  id: string;
+  userId: string;
+  name: string;
+  color: string;
+  order: number;
+  createdAt: string;
+}
+
+export type TaskStatus = "pending" | "completed";
+
+export type Recurrence = "daily" | "weekly" | "monthly" | null;
+
+export interface Task {
+  id: string;
+  userId: string;
+  sectionId: string | null;
+  projectId: string | null;
+  parentId: string | null;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: number;
+  dueDate: string | null;
+  recurrence: Recurrence;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TimeEntry {
   id: string;
   projectId: string;
