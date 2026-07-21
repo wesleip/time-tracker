@@ -63,8 +63,10 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 ├── REQUIREMENTS.md
 ├── TASKS.md
 ├── CHANGELOG.md
-├── compose.yaml               # Orquestração de produção (db, api, frontend, caddy)
-├── compose.override.yaml      # Overrides para dev local (expõe portas 8080/3001)
+├── compose.yml                # Base infrastructure (DB, networks, volumes)
+├── compose.api.yml            # API stack (DB + API)
+├── compose.frontend.yml       # Frontend stack (Frontend + Caddy)
+├── compose.frontend-full.yml  # Frontend with API dependency (full stack)
 ├── Caddyfile                  # Reverse proxy: HTTPS automático + security headers
 └── .env.example               # Template de variáveis de ambiente
 ```
@@ -164,15 +166,44 @@ python3 -c "import secrets; print(secrets.token_urlsafe(24))"
 
 ## Desenvolvimento local
 
-### Docker Compose (dev)
+### Stack Completa (make)
 
 ```bash
 cp .env.example .env
-# Mínimo: definir POSTGRES_PASSWORD, JWT_SECRET, DATABASE_URL
-# CORS_ORIGINS e DEBUG são sobrescritos pelo override
-
-docker compose up --build   # merge automático com compose.override.yaml
+make up          # Stack completa: DB + API + Frontend + Caddy
+make build-api   # Build API only
+make build-frontend  # Build frontend only
+make down        # Stop all
 ```
+
+### Stack Independente (docker compose)
+
+```bash
+# API stack only (DB + API)
+docker compose -f compose.yml -f compose.api.yml up -d
+
+# Frontend stack only (Frontend + Caddy)
+docker compose -f compose.yml -f compose.frontend.yml up -d
+
+# Full stack with compose files
+docker compose -f compose.yml -f compose.api.yml -f compose.frontend-full.yml up -d
+```
+
+### Makefile targets
+
+| Target | Descrição |
+|--------|-----------|
+| `make build` | Build both images |
+| `make build-api` | Build API only |
+| `make build-frontend` | Build frontend only |
+| `make up` | Start full stack |
+| `make up-api` | Start API stack only |
+| `make up-frontend` | Start frontend stack only |
+| `make down` | Stop all services |
+| `make push` | Multi-arch push to registry |
+| `make push-api` | Push API image only |
+| `make push-frontend` | Push frontend image only |
+| `make test` | Run backend tests |
 
 | Serviço | Porta |
 |---------|-------|

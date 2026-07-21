@@ -1,0 +1,87 @@
+# compose.frontend.yml — Frontend stack (React SPA + Caddy)
+#
+# Includes: Frontend + Caddy services
+#
+# Usage:
+#   docker compose -f compose.yml -f compose.frontend.yml up -d           # Full frontend stack
+#   docker compose -f compose.frontend.yml up -d                           # Standalone (no API dep)
+#   docker compose -f compose.frontend.yml build                            # Build frontend only
+#   docker compose -f compose.frontend.yml up -d --no-deps frontend         # Restart frontend only
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NODE_VERSION: ${NODE_VERSION:-22}
+        NGINX_VERSION: ${NGINX_VERSION:-1.28}
+    image: time-tracker-frontend:latest
+    container_name: time-tracker-frontend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    networks:
+      - time-tracker-net
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - SETUID
+      - SETGID
+      - CHOWN
+      - DAC_OVERRIDE
+    profiles:
+      - frontend
+      - full
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: time-tracker-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is required}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    networks:
+      - time-tracker-net
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    profiles:
+      - frontend
+      - full
+
+networks:
+  time-tracker-net:
+    external: true
+    name: time-tracker-network
+
+volumes:
+  caddy_data:
+    name: time-tracker-caddy-data
+  caddy_config:
+    name: time-tracker-caddy-config

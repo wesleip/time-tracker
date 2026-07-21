@@ -1,0 +1,46 @@
+# compose.yml — Base infrastructure (shared by all stacks)
+#
+# This file contains only infrastructure that doesn't change often:
+#   - Database (PostgreSQL)
+#   - Networks
+#   - Volumes
+#
+# Usage:
+#   docker compose -f compose.yml up -d        # Start base infra only
+#   docker compose -f compose.yml -f compose.api.yml up -d      # Full stack
+#   docker compose -f compose.yml -f compose.frontend.yml up -d # Frontend only
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: time-tracker-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-time_tracker}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - time-tracker-net
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+
+networks:
+  time-tracker-net:
+    name: time-tracker-network
+    driver: bridge
+
+volumes:
+  pgdata:
+    name: time-tracker-pgdata
