@@ -1,0 +1,63 @@
+# compose.api.yml — API stack (FastAPI backend)
+#
+# Includes: API service only (DB comes from compose.yml)
+#
+# Usage:
+#   docker compose -f compose.yml -f compose.api.yml up -d      # Full API stack
+#   docker compose -f compose.api.yml up -d                      # API with inline DB
+#   docker compose -f compose.api.yml build                      # Build API only
+#   docker compose -f compose.api.yml up -d --no-deps api        # Restart API only
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
+    image: time-tracker-api:latest
+    container_name: time-tracker-api
+    restart: unless-stopped
+    environment:
+      TZ: America/Sao_Paulo
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-10080}
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}
+      DEBUG: ${DEBUG:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3001/api/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    networks:
+      - time-tracker-net
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    profiles:
+      - api
+      - full
+
+  db:
+    extends:
+      file: compose.yml
+      service: db
+    profiles:
+      - api
+      - full
+
+networks:
+  time-tracker-net:
+    external: true
+    name: time-tracker-network
+
+volumes:
+  pgdata:
+    external: true
+    name: time-tracker-pgdata
