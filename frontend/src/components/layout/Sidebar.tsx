@@ -27,8 +27,8 @@ export function Sidebar({ open, onClose, collapsed }: SidebarProps) {
 
   const content = (
     <aside className={`bg-bg-secondary border-r border-primary-100 flex flex-col h-full transition-all duration-300 ${collapsed ? "w-16" : "w-60"}`}>
-      <div className="h-14 flex items-center justify-center gap-2 px-4 border-b border-primary-100">
-        <img src="/logo.svg" alt="Time Tracker" className={`w-8 h-8 ${collapsed ? "" : "hidden"}`} />
+      <div className="h-14 flex items-center gap-2 px-4 border-b border-primary-100">
+        <img src="/logo.svg" alt="Time Tracker" className="w-8 h-8 shrink-0" />
         {!collapsed && <span className="font-medium text-text-primary text-base">Time Tracker</span>}
       </div>
 
