@@ -24,3 +24,4 @@ class User(Base):
     projects = relationship("Project", back_populates="user", cascade="all, delete-orphan")
     sections = relationship("Section", back_populates="user", cascade="all, delete-orphan")
     tasks = relationship("Task", back_populates="user", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")

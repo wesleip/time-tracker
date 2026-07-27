@@ -1,9 +1,10 @@
 from app.api.routes.admin import router as admin_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.entries import router as entries_router
+from app.api.routes.notifications import router as notifications_router
 from app.api.routes.projects import router as projects_router
 from app.api.routes.reports import router as reports_router
 from app.api.routes.sections import router as sections_router
 from app.api.routes.tasks import router as tasks_router
 
-__all__ = ["admin_router", "auth_router", "projects_router", "entries_router", "reports_router", "sections_router", "tasks_router"]
+__all__ = ["admin_router", "auth_router", "entries_router", "notifications_router", "projects_router", "reports_router", "sections_router", "tasks_router"]
