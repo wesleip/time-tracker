@@ -1,3 +1,5 @@
+import { NotificationBell } from "../notifications/NotificationBell";
+
 interface HeaderProps {
   title: string;
   children?: React.ReactNode;
@@ -30,7 +32,10 @@ export function Header({ title, children, onMenuClick, onSidebarToggle, sidebarC
         </button>
         <h1 className="text-xl font-semibold text-text-primary">{title}</h1>
       </div>
-      <div className="flex items-center gap-3">{children}</div>
+      <div className="flex items-center gap-3">
+        <NotificationBell />
+        {children}
+      </div>
     </header>
   );
 }
