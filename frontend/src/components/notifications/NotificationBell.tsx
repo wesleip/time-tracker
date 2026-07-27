@@ -43,6 +43,7 @@ function NotificationItem({ task }: { task: Task & { isOverdue: boolean; isDueTo
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const { notifications, overdueCount, dueTodayCount, totalCount, isLoading } = useTaskNotifications();
   const dropdownRef = useRef<HTMLDivElement>(null);
 

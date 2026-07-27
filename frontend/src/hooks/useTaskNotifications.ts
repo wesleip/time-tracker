@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useTasks } from "./useTasks";
-import type { Task } from "../types";
 
 export function useTaskNotifications() {
   const { data: tasks = [], isLoading } = useTasks({ status: "pending" });
