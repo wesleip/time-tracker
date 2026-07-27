@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTaskNotifications } from "../../hooks/useTaskNotifications";
+import { useNotifications } from "../../hooks/useNotifications";
 import type { Task } from "../../types";
 
 function formatDate(dateStr: string): string {
@@ -44,7 +44,7 @@ function NotificationItem({ task }: { task: Task & { isOverdue: boolean; isDueTo
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { notifications, overdueCount, dueTodayCount, totalCount, isLoading } = useTaskNotifications();
+  const { notifications, overdueCount, dueTodayCount, totalCount, isLoading, markAllAsRead } = useNotifications();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,10 +61,14 @@ export function NotificationBell() {
     };
   }, [open]);
 
+  function handleOpen() {
+    setOpen(!open);
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={handleOpen}
         className="relative p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary transition-colors cursor-pointer"
         aria-label="Notificações"
       >
@@ -117,12 +121,18 @@ export function NotificationBell() {
           </div>
 
           {notifications.length > 0 && (
-            <div className="px-3 py-2 border-t border-primary-100">
+            <div className="px-3 py-2 border-t border-primary-100 flex items-center justify-between">
               <button
                 onClick={() => navigate("/tarefas")}
-                className="w-full text-center text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors cursor-pointer"
+                className="text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors cursor-pointer"
               >
                 Ver todas as tarefas
+              </button>
+              <button
+                onClick={() => markAllAsRead()}
+                className="text-xs font-medium text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
+              >
+                Marcar todas como lidas
               </button>
             </div>
           )}
