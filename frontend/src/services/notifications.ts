@@ -1,4 +1,4 @@
-import { client } from "./client";
+import api from "./client";
 
 export interface Notification {
   id: string;
@@ -17,26 +17,26 @@ interface NotificationResponse {
 }
 
 export async function fetchNotifications(unreadOnly = false): Promise<Notification[]> {
-  const { data } = await client.get("/api/notifications/", {
+  const { data } = await api.get("/api/notifications/", {
     params: { unread_only: unreadOnly },
   });
   return data;
 }
 
 export async function getUnreadCount(): Promise<number> {
-  const { data } = await client.get<NotificationResponse>("/api/notifications/unread-count");
+  const { data } = await api.get<NotificationResponse>("/api/notifications/unread-count");
   return data.count;
 }
 
 export async function markAsRead(notificationId: string): Promise<Notification> {
-  const { data } = await client.patch(`/api/notifications/${notificationId}/read`);
+  const { data } = await api.patch(`/api/notifications/${notificationId}/read`);
   return data;
 }
 
 export async function markAllAsRead(): Promise<void> {
-  await client.patch("/api/notifications/read-all");
+  await api.patch("/api/notifications/read-all");
 }
 
 export async function deleteNotification(notificationId: string): Promise<void> {
-  await client.delete(`/api/notifications/${notificationId}`);
+  await api.delete(`/api/notifications/${notificationId}`);
 }
