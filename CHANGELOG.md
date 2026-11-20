@@ -36,6 +36,8 @@
 
 - 22 novos testes: tarefas (CRUD, filtros, recorrência, isolamento), seções (incluindo o destino das tarefas ao excluir a seção), notificações (contador, leitura, isolamento) e smoke do admin
 - Suite backend passa de 18 para 40 testes
+- Testes no frontend com Vitest (jsdom + Testing Library): 22 testes cobrindo datas locais, filtro de prazo por tarefas e um componente de UI. `npm test` entra no job de frontend do CI
+- Lógica de filtro por prazo extraída da tela de Tarefas para `src/utils/taskFilters.ts` — testável sem DOM
 
 ### Infra
 

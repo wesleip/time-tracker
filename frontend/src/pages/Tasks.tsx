@@ -12,7 +12,8 @@ import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useToggleTask, u
 import { useSections, useCreateSection, useUpdateSection, useDeleteSection } from "../hooks/useSections";
 import { useProjects } from "../hooks/useProjects";
 import { TimeSuggestionModal } from "../components/tasks/TimeSuggestionModal";
-import { toISODate, addDays } from "../utils/date";
+import { toISODate } from "../utils/date";
+import { matchesWhenFilter, type WhenFilter } from "../utils/taskFilters";
 import type { Task, Section, TaskStatus } from "../types";
 
 const taskSchema = z.object({
@@ -67,21 +68,12 @@ function isDueToday(dateStr: string | null): boolean {
   if (!dateStr) return false;
   return dateStr === toISODate(new Date());
 }
-
-function startOfWeek(date: Date): Date {
-  const start = new Date(date);
-  const offset = (date.getDay() + 6) % 7; // segunda-feira = 0
-  start.setDate(date.getDate() - offset);
-  return start;
-}
 const priorityColors: Record<number, string> = {
   1: "bg-red-100 text-red-700 border-red-200",
   2: "bg-orange-100 text-orange-700 border-orange-200",
   3: "bg-blue-100 text-blue-700 border-blue-200",
   4: "bg-gray-100 text-gray-600 border-gray-200",
 };
-
-type WhenFilter = "" | "today" | "tomorrow" | "week" | "nextWeek";
 
 const whenFilters = [
   { value: "", label: "Qualquer prazo" },
@@ -142,20 +134,7 @@ export function Tasks() {
     if (!filterWhen) return sorted;
 
     const now = new Date();
-    const today = toISODate(now);
-    const tomorrow = toISODate(addDays(now, 1));
-    const weekStart = startOfWeek(now);
-    const weekEnd = toISODate(addDays(weekStart, 6));
-    const nextWeekStart = toISODate(addDays(weekStart, 7));
-    const nextWeekEnd = toISODate(addDays(weekStart, 13));
-
-    return sorted.filter((task) => {
-      if (!task.dueDate) return false;
-      if (filterWhen === "today") return task.dueDate === today;
-      if (filterWhen === "tomorrow") return task.dueDate === tomorrow;
-      if (filterWhen === "nextWeek") return task.dueDate >= nextWeekStart && task.dueDate <= nextWeekEnd;
-      return task.dueDate >= toISODate(weekStart) && task.dueDate <= weekEnd;
-    });
+    return sorted.filter((task) => matchesWhenFilter(task.dueDate, filterWhen, now));
   }, [tasks, filterWhen]);
 
   const hasActiveFilter = !!(search || filterStatus || filterSection || filterProject || filterWhen);

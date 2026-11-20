@@ -199,6 +199,7 @@ git push / PR → ci.yml
                           ├── setup Node 24 (cache npm)
                           ├── npm ci
                           ├── npm run lint (ESLint)
+                          ├── npm test (Vitest)
                           └── npm run build (tsc -b + vite build)
 ```
 
