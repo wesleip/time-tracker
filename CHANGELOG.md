@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.7.0 (2026-07-27)
+
+### Tarefas
+
+- Novos modelos `Section` e `Task` (migração `a1b2c3d4e5f6`)
+- Endpoints CRUD de tarefas + `PATCH /tasks/{id}/toggle` e `/complete`
+- Recorrência diária, semanal e mensal: ao concluir, a próxima ocorrência é criada com `parent_id`
+- Seção padrão "Geral" criada automaticamente na primeira listagem/criação
+- Prioridade 1–4 com cor e ordenação (urgente → baixa, concluídas ao final)
+- Página Tarefas com filtros de status e seção, busca e destaque de atrasadas / vence hoje
+
+### Notificações
+
+- Modelo `Notification` e migração `b2c3d4e5f6a1`
+- Endpoints: listar, criar, contador de não lidas, marcar uma/todas como lidas, remover
+- Tipos: `task_reminder`, `task_overdue`, `task_due_today`, `system`
+- Sino de notificações no frontend com contador
+
+### Admin
+
+- Campo `is_admin` em `users` (migração `5a1b2c3d4e5f`) e dependência de rota em `/api/admin/*`
+- Endpoints: overview, usuários (listar, toggle-admin, remover), projetos (listar, remover), timelogs
+- Telas de administração com `AdminRoute`
+
+### Documentação
+
+- `ARCHITECTURE.md`, `docs/api-spec.md`, `docs/glossary.md` e `README.md` sincronizados com o código
+- `REQUIREMENTS.md` com escopo explícito (módulo de Tarefas) e status conferido item a item
+
 ## 0.6.0 (2026-06-07)
 
 ### CI/CD — Geração de Imagens Docker

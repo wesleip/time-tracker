@@ -12,7 +12,10 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 - **Projetos** — CRUD com identificação visual por cores e busca
 - **Relatório semanal** — Breakdown segunda–domingo com total por projeto
 - **Relatório mensal** — Visão agregada por dia e por projeto
-- **API REST** — 15 endpoints com autenticação JWT e validação Pydantic
+- **Tarefas** — Lista com seções, prioridade 1–4, vencimento, busca e recorrência (diária/semanal/mensal)
+- **Notificações** — Avisos de tarefas vencidas e que vencem no dia, com contador de não lidas
+- **Admin** — Painel para gerenciar usuários, projetos e registros globais
+- **API REST** — 41 endpoints com autenticação JWT e validação Pydantic
 
 ## Stack
 
@@ -32,7 +35,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 │   │   ├── components/        # UI, layout e dashboard
 │   │   ├── contexts/          # AuthContext (JWT + user state)
 │   │   ├── hooks/             # TanStack Query hooks
-│   │   ├── pages/             # Dashboard, TimeLog, Projetos, Semana, Relatório, Login, Register
+│   │   ├── pages/             # Dashboard, TimeLog, Projetos, Semana, Relatório, Tarefas, Login, Register, admin/
 │   │   ├── services/          # API client (Axios) com camelCase ↔ snake_case
 │   │   ├── types/             # Interfaces TypeScript
 │   │   └── utils/             # Formatação de datas (pt-BR)
@@ -44,15 +47,15 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 │   ├── app/
 │   │   ├── api/
 │   │   │   ├── deps.py        # get_current_user dependency (JWT)
-│   │   │   └── routes/        # auth, projects, entries, reports
+│   │   │   └── routes/        # auth, projects, entries, reports, tasks, sections, notifications, admin
 │   │   ├── core/              # Config (Pydantic Settings), database, security (JWT + bcrypt)
-│   │   ├── models/            # SQLAlchemy ORM (User, Project, TimeEntry)
+│   │   ├── models/            # SQLAlchemy ORM (User, Project, TimeEntry, Section, Task, Notification)
 │   │   ├── repositories/      # Data access layer
 │   │   ├── schemas/           # Pydantic request/response
 │   │   ├── services/          # Business logic
 │   │   └── main.py            # App factory, CORS, error handlers
 │   ├── alembic/               # Database migrations
-│   ├── tests/                 # pytest (18 testes: auth, projetos, registros)
+│   ├── tests/                 # pytest (auth, projetos, registros)
 │   ├── Dockerfile             # python:3.12-alpine
 │   ├── pyproject.toml         # Poetry dependencies
 │   └── run.py                 # Uvicorn dev runner
@@ -116,6 +119,54 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 | `GET` | `/api/reports/daily` | `report_date` | Resumo diário por projeto |
 | `GET` | `/api/reports/weekly` | `report_date` | Resumo semanal (seg–dom) |
 | `GET` | `/api/reports/monthly` | `month` | Relatório mensal por dia e projeto |
+
+### Tarefas
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/tasks/` | Listar (`status`, `section_id`, `project_id`, `due_date`, `search`) |
+| `POST` | `/api/tasks/` | Criar tarefa |
+| `GET` | `/api/tasks/{id}` | Buscar tarefa |
+| `PUT` | `/api/tasks/{id}` | Atualizar tarefa |
+| `DELETE` | `/api/tasks/{id}` | Remover tarefa |
+| `PATCH` | `/api/tasks/{id}/toggle` | Alternar pendente/concluída |
+| `PATCH` | `/api/tasks/{id}/complete` | Concluir e gerar próxima ocorrência se recorrente |
+
+### Seções
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/sections/` | Listar seções do usuário |
+| `POST` | `/api/sections/` | Criar seção |
+| `PUT` | `/api/sections/{id}` | Atualizar seção |
+| `DELETE` | `/api/sections/{id}` | Remover seção |
+
+### Notificações
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/notifications/` | Listar notificações |
+| `POST` | `/api/notifications/` | Criar notificação |
+| `GET` | `/api/notifications/unread-count` | Contador de não lidas |
+| `PATCH` | `/api/notifications/{id}/read` | Marcar como lida |
+| `PATCH` | `/api/notifications/read-all` | Marcar todas como lidas |
+| `DELETE` | `/api/notifications/{id}` | Remover notificação |
+
+### Admin
+
+Exigem usuário com `is_admin`.
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/admin/overview` | Totais gerais |
+| `GET` | `/api/admin/users` | Listar usuários |
+| `PATCH` | `/api/admin/users/{id}/toggle-admin` | Conceder/remover admin |
+| `DELETE` | `/api/admin/users/{id}` | Remover usuário |
+| `GET` | `/api/admin/projects` | Listar projetos de todos os usuários |
+| `DELETE` | `/api/admin/projects/{id}` | Remover projeto |
+| `GET` | `/api/admin/timelogs` | Registros de todos os usuários |
+
+Contrato detalhado e exemplos: `docs/api-spec.md`. Fonte de verdade: OpenAPI em `/docs`.
 
 ## Deploy (produção)
 
@@ -297,6 +348,48 @@ Pages → Hooks (TanStack Query) → Services (Axios) → API
 | `date` | DateTime(tz) | NOT NULL, indexed |
 | `created_at` | DateTime(tz) | default now |
 | `updated_at` | DateTime(tz) | default now, auto-update |
+
+### Section
+
+| Coluna | Tipo | Restrição |
+|--------|------|-----------|
+| `id` | String(36) | PK, UUID |
+| `user_id` | String(36) | FK → users.id |
+| `name` | String(100) | NOT NULL |
+| `color` | String(7) | NOT NULL, default `#6366f1` |
+| `order` | Int | NOT NULL, default 0 |
+| `created_at` | DateTime(tz) | default now |
+
+### Task
+
+| Coluna | Tipo | Restrição |
+|--------|------|-----------|
+| `id` | String(36) | PK, UUID |
+| `user_id` | String(36) | FK → users.id |
+| `section_id` | String(36) | FK → sections.id, nullable |
+| `project_id` | String(36) | FK → projects.id, nullable |
+| `parent_id` | String(36) | FK → tasks.id, nullable (recorrência) |
+| `title` | String(255) | NOT NULL |
+| `description` | Text | nullable |
+| `status` | String(20) | `pending` \| `completed` |
+| `priority` | Int | 1–4 (1 = urgente) |
+| `due_date` | Date | nullable, indexed |
+| `recurrence` | String(20) | `daily` \| `weekly` \| `monthly`, nullable |
+| `completed_at` | DateTime(tz) | nullable |
+| `created_at` / `updated_at` | DateTime(tz) | default now |
+
+### Notification
+
+| Coluna | Tipo | Restrição |
+|--------|------|-----------|
+| `id` | String(36) | PK, UUID |
+| `user_id` | String(36) | FK → users.id |
+| `title` | String(255) | NOT NULL |
+| `message` | Text | nullable |
+| `type` | String(50) | `task_reminder`, `task_overdue`, `task_due_today`, `system` |
+| `reference_id` | String(36) | nullable |
+| `is_read` | Boolean | NOT NULL, default false |
+| `created_at` / `updated_at` | DateTime(tz) | default now |
 
 ## Design System
 
