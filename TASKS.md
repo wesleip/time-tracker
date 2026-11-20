@@ -37,7 +37,6 @@
 - [ ] Integração Azure DevOps
 - [ ] Reordenar seções (drag ou up/down)
 - [ ] Filtros rápidos de tarefas: hoje / semana
-- [ ] Vincular tarefa a projeto pela interface
 - [ ] Sugerir registro de tempo ao concluir tarefa com projeto
 - [ ] Testes frontend (Vitest)
 - [ ] Refresh token
