@@ -4,6 +4,7 @@ import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { useMonthlyReport } from "../hooks/useEntries";
+import { downloadCsv, toCsv } from "../utils/csv";
 import { formatMonthYear } from "../utils/date";
 
 export function MonthlyReportPage() {
@@ -18,6 +19,18 @@ export function MonthlyReportPage() {
     setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
   }
 
+  function exportCsv() {
+    if (!report) return;
+    const rows: (string | number)[][] = [["Data", "Projeto", "Horas"]];
+    for (const day of report.days) {
+      for (const project of day.projects) {
+        rows.push([day.date, project.projectName, project.totalHours]);
+      }
+    }
+    rows.push(["Total", "", report.totalHours]);
+    downloadCsv(`relatorio-${month}.csv`, toCsv(rows));
+  }
+
   return (
     <Layout title="Relatório Mensal">
       <div className="p-4 md:p-6 space-y-6">
@@ -28,6 +41,14 @@ export function MonthlyReportPage() {
           <span className="text-lg font-medium text-text-primary">{formatMonthYear(month)}</span>
           <Button variant="secondary" onClick={() => changeMonth(1)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
+          </Button>
+          <Button
+            variant="secondary"
+            className="ml-auto"
+            onClick={exportCsv}
+            disabled={!report || report.days.length === 0}
+          >
+            Exportar CSV
           </Button>
         </div>
 
