@@ -42,7 +42,7 @@ Pages → Hooks (TanStack Query) → Services (Axios) → API
 | Entidade | Tabela | Relacionamentos |
 |---|---|---|
 | `User` | `users` | 1:N com projects, sections, tasks, notifications |
-| `Project` | `projects` | → `users.id` (nullable no schema atual); 1:N com entries e tasks; `ON DELETE CASCADE` |
+| `Project` | `projects` | → `users.id` (NOT NULL); 1:N com entries e tasks; `ON DELETE CASCADE` |
 | `TimeEntry` | `time_entries` | → `projects.id` |
 | `Section` | `sections` | → `users.id`; 1:N com tasks (ao excluir a seção, as tarefas vão para "Sem seção") |
 | `Task` | `tasks` | → `users.id`, `sections.id`, `projects.id`, `tasks.id` (`parent_id`, recorrência) |

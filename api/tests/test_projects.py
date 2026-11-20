@@ -1,5 +1,16 @@
+from app.models import Project
+
+
 def create_project(client, headers, name="Proj A", color="#3b82f6"):
     return client.post("/api/projects/", json={"name": name, "color": color}, headers=headers)
+
+
+def test_project_requires_owner(client, auth_headers, db):
+    """Todo projeto tem dono: a coluna é NOT NULL e a criação sempre define user_id."""
+    assert Project.__table__.c.user_id.nullable is False
+
+    create_project(client, auth_headers)
+    assert db.query(Project).one().user_id is not None
 
 
 def test_list_projects_empty(client, auth_headers):

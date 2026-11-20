@@ -26,7 +26,7 @@
 
 ### Testes
 
-- 22 novos testes: tarefas (CRUD, filtros, recorrência, isolamento), seções (incluindo cascade nas tarefas), notificações (contador, leitura, isolamento) e smoke do admin
+- 22 novos testes: tarefas (CRUD, filtros, recorrência, isolamento), seções (incluindo o destino das tarefas ao excluir a seção), notificações (contador, leitura, isolamento) e smoke do admin
 - Suite backend passa de 18 para 40 testes
 
 ### Infra
@@ -42,6 +42,10 @@
 
 - `JWT_SECRET` passa a ser obrigatório: removido o fallback `"change-this-secret-in-production"` de `app/core/config.py`. Sem a variável, a API falha na inicialização em vez de assinar tokens com segredo público
 - `conftest.py` define `JWT_SECRET` de teste antes de carregar as settings; CI já fornecia a variável
+
+### Banco
+
+- `projects.user_id` passa a ser `NOT NULL` (migração `c3d4e5f6a7b8`). Projetos criados antes da autenticação multi-usuário são reatribuídos ao usuário mais antigo — o único dono plausível dos dados pré-auth — em vez de ficarem órfãos e invisíveis para todo mundo. Se existirem projetos órfãos e nenhum usuário cadastrado, a migração falha com mensagem explícita (o operador atribui o dono e roda de novo) em vez de aceitar a coluna opcional em silêncio
 
 ### Correções
 
