@@ -44,7 +44,7 @@ Sistema de gerenciamento de tarefas pessoais (todo list) inspirado em Todoist e 
 - [x] Data de vencimento (due_date) opcional
 - [x] Destaque visual para tarefas vencidas
 - [x] Destaque visual para vence hoje
-- [ ] Navegação rápida: hoje, amanhã, próxima semana
+- [x] Navegação rápida: hoje, amanhã, próxima semana
 
 ### Integração com Time Tracker
 
@@ -52,7 +52,7 @@ Sistema de gerenciamento de tarefas pessoais (todo list) inspirado em Todoist e 
 - [x] Ao concluir tarefa com projeto vinculado, sugerir registro de tempo
 - [x] Filtro "Vinculadas ao projeto X" na listagem
 
-> **Status (conferido no código em 2026-11):** vínculo de tarefa com projeto disponível no formulário (opcional) e filtro por projeto na listagem. Concluir uma tarefa com projeto vinculado sugere o registro das horas. Filtros rápidos de "hoje/semana", reordenação de seções e navegação rápida de data **não** existem — estão listados em `TASKS.md`.
+> **Status (conferido no código em 2026-11):** vínculo de tarefa com projeto disponível no formulário (opcional) e filtro por projeto na listagem. Concluir uma tarefa com projeto vinculado sugere o registro das horas. Navegação rápida de data (hoje, amanhã, esta semana, próxima semana) e reordenação de seções existem na tela de Tarefas.
 
 ## API Endpoints
 

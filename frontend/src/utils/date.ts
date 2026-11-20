@@ -37,3 +37,9 @@ export function toISODate(date: Date): string {
 export function todayISO(): string {
   return toISODate(new Date());
 }
+
+export function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
