@@ -43,6 +43,10 @@
 - `JWT_SECRET` passa a ser obrigatório: removido o fallback `"change-this-secret-in-production"` de `app/core/config.py`. Sem a variável, a API falha na inicialização em vez de assinar tokens com segredo público
 - `conftest.py` define `JWT_SECRET` de teste antes de carregar as settings; CI já fornecia a variável
 
+### Correções
+
+- Excluir uma seção não apaga mais as tarefas: elas passam para "Sem seção" (`section_id` nulo), como o `REQUIREMENTS.md` previa. O `cascade="all, delete-orphan"` da relação `Section.tasks` foi removido e o `SectionService` agora libera as tarefas antes de excluir a seção
+
 ### Documentação
 
 - `ARCHITECTURE.md`, `docs/api-spec.md`, `docs/glossary.md` e `README.md` sincronizados com o código

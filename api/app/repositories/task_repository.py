@@ -33,6 +33,14 @@ class TaskRepository:
     def get_by_parent(self, parent_id: str) -> list[Task]:
         return self.db.query(Task).filter(Task.parent_id == parent_id).all()
 
+    def list_by_section(self, section_id: str) -> list[Task]:
+        return self.db.query(Task).filter(Task.section_id == section_id).all()
+
+    def clear_section(self, section_id: str) -> None:
+        for task in self.list_by_section(section_id):
+            task.section_id = None
+        self.db.commit()
+
     def create(self, data: dict) -> Task:
         task = Task(**data)
         self.db.add(task)
