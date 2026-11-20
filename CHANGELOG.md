@@ -24,6 +24,11 @@
 - Endpoints: overview, usuários (listar, toggle-admin, remover), projetos (listar, remover), timelogs
 - Telas de administração com `AdminRoute`
 
+### Testes
+
+- 22 novos testes: tarefas (CRUD, filtros, recorrência, isolamento), seções (incluindo cascade nas tarefas), notificações (contador, leitura, isolamento) e smoke do admin
+- Suite backend passa de 18 para 40 testes
+
 ### Documentação
 
 - `ARCHITECTURE.md`, `docs/api-spec.md`, `docs/glossary.md` e `README.md` sincronizados com o código

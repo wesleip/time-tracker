@@ -55,7 +55,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 │   │   ├── services/          # Business logic
 │   │   └── main.py            # App factory, CORS, error handlers
 │   ├── alembic/               # Database migrations
-│   ├── tests/                 # pytest (auth, projetos, registros)
+│   ├── tests/                 # pytest (auth, projetos, registros, tarefas, seções, notificações, admin)
 │   ├── Dockerfile             # python:3.12-alpine
 │   ├── pyproject.toml         # Poetry dependencies
 │   └── run.py                 # Uvicorn dev runner
