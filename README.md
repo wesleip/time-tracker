@@ -11,7 +11,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 - **Registrar** — Apontamento diário com navegação entre dias, busca e CRUD de registros
 - **Projetos** — CRUD com identificação visual por cores e busca
 - **Relatório semanal** — Breakdown segunda–domingo com total por projeto
-- **Relatório mensal** — Visão agregada por dia e por projeto, com planilha de horas (dias × projetos) e exportação em CSV
+- **Relatório mensal** — Visão agregada por dia e por projeto, com planilha de horas (dias × projetos), exportação em CSV e PDF
 - **Tarefas** — Lista com seções, prioridade 1–4, vencimento, busca e recorrência (diária/semanal/mensal)
 - **Notificações** — Avisos de tarefas vencidas e que vencem no dia, com contador de não lidas
 - **Admin** — Painel para gerenciar usuários, projetos e registros globais
@@ -120,6 +120,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 | `GET` | `/api/reports/daily` | `report_date` | Resumo diário por projeto |
 | `GET` | `/api/reports/weekly` | `report_date` | Resumo semanal (seg–dom) |
 | `GET` | `/api/reports/monthly` | `month` | Relatório mensal por dia e projeto |
+| `GET` | `/api/reports/monthly/pdf` | `month` | Relatório mensal em PDF (download) |
 
 ### Tarefas
 
