@@ -469,6 +469,16 @@ Separar:
 
 ---
 
+# Regras de Desenvolvimento
+
+* Não remover funcionalidades existentes.
+* Atualizar documentação ao alterar comportamento.
+* Criar commits pequenos e objetivos.
+* Priorizar MVP antes de novas funcionalidades.
+* Criar testes quando possível.
+
+---
+
 # AI Agent Rules
 
 Antes de implementar qualquer funcionalidade:
