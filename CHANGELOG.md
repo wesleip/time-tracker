@@ -79,6 +79,11 @@
 
 - Tela de Relatório Mensal ganha botão **Exportar CSV** (um registro por dia/projeto, mais a linha de total), com `;` como separador, vírgula decimal e BOM UTF-8 — abre direto no Excel e no LibreOffice em pt-BR sem ajuste de importação. Geração no navegador: sem endpoint novo e sem dependência
 
+### Timesheet
+
+- Relatório Mensal ganha a visão **Planilha**: grade dias × projetos com total por dia, por projeto e do mês, derivada do mesmo `/reports/monthly` — sem endpoint novo. A visão em lista continua sendo o padrão; o CSV exporta o formato longo (uma linha por dia/projeto), que é o que planilhas e importadores esperam
+- Lógica da grade em `src/utils/timesheet.ts` (`buildTimesheet`), testada sem DOM: ordem das colunas, posicionamento das horas, somas por dia/projeto/mês, arredondamento de ponto flutuante e mês vazio
+
 ### Documentação
 
 - `ARCHITECTURE.md`, `docs/api-spec.md`, `docs/glossary.md` e `README.md` sincronizados com o código

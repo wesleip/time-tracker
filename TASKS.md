@@ -33,11 +33,11 @@
 - [x] Paginação de registros e tarefas (`limit`/`offset` + header `X-Total-Count`)
 - [x] Testes frontend (Vitest): datas locais, filtro de prazo e componentes de UI
 - [x] Exportar CSV do relatório mensal (gerado no navegador, sem endpoint novo)
+- [x] Timesheet automático (visão Planilha do Relatório Mensal: dias × projetos)
 
 ## Futuro
 
 - [ ] Exportar PDF (por ora: CSV + "Imprimir → Salvar como PDF" do navegador)
-- [ ] Timesheet automático
 - [ ] Integração Jira
 - [ ] Integração Azure DevOps
-- [ ] Refresh token
+- [ ] Refresh token — adiado: o access token já dura 7 dias, então o ganho seria só encurtar a janela de exposição. Um refresh de verdade exige tabela `refresh_tokens`, rotação com detecção de reuso, `/auth/refresh` e `/auth/logout` e interceptor no axios (enfileirando requisições concorrentes). Hoje o que falta de fato é revogação: o logout não invalida o token
