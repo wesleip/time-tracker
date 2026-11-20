@@ -51,7 +51,7 @@ FROM node:22-alpine
 ```
 
 ```dockerfile
-FROM python:3.13-slim
+FROM python:3.12-slim
 ```
 
 ### Evitar
@@ -69,7 +69,7 @@ Sempre utilizar versões explícitas.
 ### Bom
 
 ```dockerfile
-FROM postgres:17.4
+FROM postgres:16-alpine
 ```
 
 ### Evitar
