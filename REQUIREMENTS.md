@@ -49,10 +49,10 @@ Sistema de gerenciamento de tarefas pessoais (todo list) inspirado em Todoist e 
 ### Integração com Time Tracker
 
 - [x] Vincular tarefa a um projeto existente (opcional)
-- [ ] Ao concluir tarefa com projeto vinculado, sugerir registro de tempo
+- [x] Ao concluir tarefa com projeto vinculado, sugerir registro de tempo
 - [x] Filtro "Vinculadas ao projeto X" na listagem
 
-> **Status (conferido no código em 2026-11):** vínculo de tarefa com projeto disponível no formulário (opcional) e filtro por projeto na listagem. Filtros rápidos de "hoje/semana", reordenação de seções, navegação rápida de data e a sugestão de registro de tempo ao concluir uma tarefa vinculada ainda não existem — estão listados em `TASKS.md`.
+> **Status (conferido no código em 2026-11):** vínculo de tarefa com projeto disponível no formulário (opcional) e filtro por projeto na listagem. Concluir uma tarefa com projeto vinculado sugere o registro das horas. Filtros rápidos de "hoje/semana", reordenação de seções e navegação rápida de data **não** existem — estão listados em `TASKS.md`.
 
 ## API Endpoints
 

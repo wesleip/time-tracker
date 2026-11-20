@@ -30,6 +30,7 @@
 
 ## Futuro
 
+- [ ] Navegação rápida de data na tela de Tarefas (hoje, amanhã, próxima semana)
 - [ ] Exportar CSV
 - [ ] Exportar PDF
 - [ ] Timesheet automático

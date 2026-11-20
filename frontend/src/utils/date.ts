@@ -20,7 +20,20 @@ export function formatDayOfWeek(dateStr: string): string {
   return DAYS[new Date(dateStr + "T12:00:00").getDay()];
 }
 
-export function formatMonthYear(isoString: string): string {
-  const [year, month] = isoString.split("-");
+export function formatMonthYear(dateStr: string): string {
+  const [year, month] = dateStr.split("-");
   return `${MONTHS[parseInt(month) - 1]} ${year}`;
+}
+
+// Datas locais em "YYYY-MM-DD". new Date().toISOString() usaria UTC e deslocaria
+// o dia em fusos negativos (UTC-3) à noite.
+export function toISODate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function todayISO(): string {
+  return toISODate(new Date());
 }
