@@ -17,9 +17,12 @@ class TaskService:
         self.repo = repo
         self.section_repo = section_repo
 
-    def list_all(self, user: User, status: str | None = None, section_id: str | None = None, due_date: date | None = None, search: str | None = None, project_id: str | None = None):
+    def list_all(self, user: User, status: str | None = None, section_id: str | None = None, due_date: date | None = None, search: str | None = None, project_id: str | None = None, limit: int | None = None, offset: int = 0):
         self.section_repo.ensure_default(user.id)
-        return self.repo.list_all(user.id, status, section_id, due_date, search, project_id)
+        return self.repo.list_all(user.id, status, section_id, due_date, search, project_id, limit, offset)
+
+    def count_all(self, user: User, status: str | None = None, section_id: str | None = None, due_date: date | None = None, search: str | None = None, project_id: str | None = None) -> int:
+        return self.repo.count_all(user.id, status, section_id, due_date, search, project_id)
 
     def get_by_id(self, task_id: str, user: User):
         task = self.repo.get_by_id(task_id, user.id)

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -20,13 +20,18 @@ def get_service(db: Session = Depends(get_db)) -> EntryService:
 
 @router.get("/", response_model=list[TimeEntryWithProject])
 def list_entries(
+    response: Response,
     entry_date: date | None = Query(None, alias="date"),
     project_id: str | None = Query(None),
+    limit: int | None = Query(None, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     service: EntryService = Depends(get_service),
     current_user: User = Depends(get_current_user),
 ):
     dt = datetime.combine(entry_date, datetime.min.time()) if entry_date else None
-    return service.list_all(current_user, dt, project_id)
+    items = service.list_all(current_user, dt, project_id, limit, offset)
+    response.headers["X-Total-Count"] = str(service.count_all(current_user, dt, project_id))
+    return items
 
 
 @router.post("/", response_model=TimeEntryResponse, status_code=status.HTTP_201_CREATED)

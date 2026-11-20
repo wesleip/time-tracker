@@ -129,3 +129,41 @@ def test_tasks_isolated_between_users(client, auth_headers):
 
 def test_tasks_require_auth(client):
     assert client.get("/api/tasks/").status_code in (401, 403)
+
+
+def test_list_tasks_pagination(client, auth_headers):
+    for i in range(3):
+        create_task(client, auth_headers, title=f"Tarefa {i}")
+
+    page = client.get("/api/tasks/", params={"limit": 2}, headers=auth_headers)
+    assert page.status_code == 200
+    assert len(page.json()) == 2
+    assert page.headers["X-Total-Count"] == "3"
+
+    rest = client.get("/api/tasks/", params={"limit": 2, "offset": 2}, headers=auth_headers)
+    assert len(rest.json()) == 1
+    assert rest.headers["X-Total-Count"] == "3"
+
+
+def test_list_tasks_without_limit_returns_all(client, auth_headers):
+    for i in range(3):
+        create_task(client, auth_headers, title=f"Tarefa {i}")
+
+    response = client.get("/api/tasks/", headers=auth_headers)
+    assert len(response.json()) == 3
+    assert response.headers["X-Total-Count"] == "3"
+
+
+def test_total_count_respects_filters(client, auth_headers):
+    create_task(client, auth_headers, title="Escrever relatório")
+    create_task(client, auth_headers, title="Fazer deploy")
+
+    response = client.get("/api/tasks/", params={"search": "relat"}, headers=auth_headers)
+    assert len(response.json()) == 1
+    assert response.headers["X-Total-Count"] == "1"
+
+
+def test_list_tasks_rejects_invalid_pagination(client, auth_headers):
+    assert client.get("/api/tasks/", params={"limit": 0}, headers=auth_headers).status_code == 422
+    assert client.get("/api/tasks/", params={"limit": 500}, headers=auth_headers).status_code == 422
+    assert client.get("/api/tasks/", params={"offset": -1}, headers=auth_headers).status_code == 422

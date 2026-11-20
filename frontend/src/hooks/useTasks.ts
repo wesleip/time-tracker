@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as tasksService from "../services/tasks";
-import type { Task, TaskStatus } from "../types";
+import type { TaskStatus } from "../types";
 
 interface TaskFilters {
   status?: TaskStatus;
@@ -10,10 +10,10 @@ interface TaskFilters {
   projectId?: string;
 }
 
-export function useTasks(filters?: TaskFilters) {
-  return useQuery<Task[]>({
-    queryKey: ["tasks", filters],
-    queryFn: () => tasksService.fetchTasks(filters),
+export function useTasks(filters?: TaskFilters, pagination?: { limit?: number; offset?: number }) {
+  return useQuery({
+    queryKey: ["tasks", filters, pagination],
+    queryFn: () => tasksService.fetchTasks(filters, pagination),
   });
 }
 

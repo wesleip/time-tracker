@@ -13,8 +13,8 @@ class EntryService:
         self.entry_repo = entry_repo
         self.project_repo = project_repo
 
-    def list_all(self, user: User, entry_date: datetime | None = None, project_id: str | None = None):
-        entries = self.entry_repo.list_all(user.id, entry_date, project_id)
+    def list_all(self, user: User, entry_date: datetime | None = None, project_id: str | None = None, limit: int | None = None, offset: int = 0):
+        entries = self.entry_repo.list_all(user.id, entry_date, project_id, limit, offset)
         return [
             TimeEntryWithProject(
                 id=e.id,
@@ -29,6 +29,9 @@ class EntryService:
             )
             for e in entries
         ]
+
+    def count_all(self, user: User, entry_date: datetime | None = None, project_id: str | None = None) -> int:
+        return self.entry_repo.count_all(user.id, entry_date, project_id)
 
     def get_by_id(self, entry_id: str, user: User):
         entry = self.entry_repo.get_by_id(entry_id, user.id)

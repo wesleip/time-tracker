@@ -106,7 +106,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 
 | Método | Rota | Query Params | Descrição |
 |--------|------|-------------|-----------|
-| `GET` | `/api/entries/` | `date`, `project_id` | Listar registros |
+| `GET` | `/api/entries/` | `date`, `project_id`, `limit`, `offset` | Listar registros |
 | `POST` | `/api/entries/` | — | Criar registro |
 | `GET` | `/api/entries/{id}` | — | Buscar registro por ID |
 | `PUT` | `/api/entries/{id}` | — | Atualizar registro |
@@ -124,7 +124,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/tasks/` | Listar (`status`, `section_id`, `project_id`, `due_date`, `search`) |
+| `GET` | `/api/tasks/` | Listar (`status`, `section_id`, `project_id`, `due_date`, `search`, `limit`, `offset`) |
 | `POST` | `/api/tasks/` | Criar tarefa |
 | `GET` | `/api/tasks/{id}` | Buscar tarefa |
 | `PUT` | `/api/tasks/{id}` | Atualizar tarefa |

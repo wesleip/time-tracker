@@ -11,7 +11,7 @@ class TaskRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def list_all(self, user_id: str, status: str | None = None, section_id: str | None = None, due_date: date | None = None, search: str | None = None, project_id: str | None = None) -> list[Task]:
+    def _filtered_query(self, user_id: str, status: str | None = None, section_id: str | None = None, due_date: date | None = None, search: str | None = None, project_id: str | None = None):
         query = self.db.query(Task).filter(Task.user_id == user_id)
 
         if status:
@@ -25,7 +25,21 @@ class TaskRepository:
         if project_id:
             query = query.filter(Task.project_id == project_id)
 
-        return query.order_by(Task.priority, Task.created_at.desc()).all()
+        return query
+
+    def list_all(self, user_id: str, status: str | None = None, section_id: str | None = None, due_date: date | None = None, search: str | None = None, project_id: str | None = None, limit: int | None = None, offset: int = 0) -> list[Task]:
+        query = self._filtered_query(user_id, status, section_id, due_date, search, project_id)
+        query = query.order_by(Task.priority, Task.created_at.desc())
+
+        if offset:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+
+        return query.all()
+
+    def count_all(self, user_id: str, status: str | None = None, section_id: str | None = None, due_date: date | None = None, search: str | None = None, project_id: str | None = None) -> int:
+        return self._filtered_query(user_id, status, section_id, due_date, search, project_id).count()
 
     def get_by_id(self, task_id: str, user_id: str) -> Task | None:
         return self.db.query(Task).filter(Task.id == task_id, Task.user_id == user_id).first()

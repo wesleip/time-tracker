@@ -1,5 +1,5 @@
 from datetime import date
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -19,6 +19,7 @@ def get_service(db: Session = Depends(get_db)) -> TaskService:
 
 @router.get("/", response_model=list[TaskResponse])
 def list_tasks(
+    response: Response,
     service: TaskService = Depends(get_service),
     current_user: User = Depends(get_current_user),
     status: str | None = Query(None),
@@ -26,8 +27,14 @@ def list_tasks(
     due_date: date | None = Query(None),
     search: str | None = Query(None),
     project_id: str | None = Query(None),
+    limit: int | None = Query(None, ge=1, le=200),
+    offset: int = Query(0, ge=0),
 ):
-    return service.list_all(current_user, status, section_id, due_date, search, project_id)
+    items = service.list_all(current_user, status, section_id, due_date, search, project_id, limit, offset)
+    response.headers["X-Total-Count"] = str(
+        service.count_all(current_user, status, section_id, due_date, search, project_id)
+    )
+    return items
 
 
 @router.post("/", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)

@@ -69,6 +69,12 @@
 
 - Excluir uma seção não apaga mais as tarefas: elas passam para "Sem seção" (`section_id` nulo), como o `REQUIREMENTS.md` previa. O `cascade="all, delete-orphan"` da relação `Section.tasks` foi removido e o `SectionService` agora libera as tarefas antes de excluir a seção
 
+### Paginação
+
+- `GET /api/tasks/` e `GET /api/entries/` aceitam `limit` (1–200) e `offset` (≥0). Sem `limit` a rota continua devolvendo tudo, então nenhum consumidor existente quebra
+- O total da consulta (respeitando os filtros) vai no header `X-Total-Count`, exposto no CORS
+- Tela de Tarefas passa a carregar 50 por vez, com botão "Carregar mais" e contador "Mostrando X de Y"; trocar de filtro volta para a primeira página
+
 ### Documentação
 
 - `ARCHITECTURE.md`, `docs/api-spec.md`, `docs/glossary.md` e `README.md` sincronizados com o código
