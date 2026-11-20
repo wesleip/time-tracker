@@ -5,6 +5,7 @@ from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.models.user import User
 from app.repositories.section_repository import SectionRepository
+from app.repositories.task_repository import TaskRepository
 from app.schemas.section import SectionCreate, SectionResponse, SectionUpdate
 from app.services.section_service import SectionService
 
@@ -12,7 +13,7 @@ router = APIRouter(prefix="/api/sections", tags=["sections"])
 
 
 def get_service(db: Session = Depends(get_db)) -> SectionService:
-    return SectionService(SectionRepository(db))
+    return SectionService(SectionRepository(db), TaskRepository(db))
 
 
 @router.get("/", response_model=list[SectionResponse])

@@ -21,4 +21,5 @@ class Section(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(TZ), nullable=False)
 
     user = relationship("User", back_populates="sections")
-    tasks = relationship("Task", back_populates="section", cascade="all, delete-orphan")
+    # Sem delete-orphan: excluir uma seção mantém as tarefas (vão para "Sem seção").
+    tasks = relationship("Task", back_populates="section", cascade="save-update")

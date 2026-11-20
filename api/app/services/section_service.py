@@ -2,12 +2,14 @@ from fastapi import HTTPException, status
 
 from app.models.user import User
 from app.repositories.section_repository import SectionRepository
+from app.repositories.task_repository import TaskRepository
 from app.schemas.section import SectionCreate, SectionUpdate
 
 
 class SectionService:
-    def __init__(self, repo: SectionRepository):
+    def __init__(self, repo: SectionRepository, task_repo: TaskRepository):
         self.repo = repo
+        self.task_repo = task_repo
 
     def list_all(self, user: User):
         return self.repo.list_all(user.id)
@@ -33,6 +35,8 @@ class SectionService:
         section = self.repo.get_by_id(section_id, user.id)
         if not section:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Section not found")
+        # Tarefas da seção vão para "Sem seção" (section_id nulo) em vez de serem apagadas.
+        self.task_repo.clear_section(section.id)
         self.repo.delete(section)
 
     def ensure_default(self, user: User):

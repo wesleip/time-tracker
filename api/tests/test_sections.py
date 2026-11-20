@@ -35,8 +35,8 @@ def test_delete_section(client, auth_headers):
     assert client.delete(f"/api/sections/{section_id}", headers=auth_headers).status_code == 404
 
 
-def test_deleting_section_cascades_to_its_tasks(client, auth_headers):
-    """Documenta o comportamento atual: excluir seção apaga as tarefas (não move)."""
+def test_deleting_section_keeps_its_tasks(client, auth_headers):
+    """As tarefas da seção sobrevivem e vão para 'Sem seção' (section_id nulo)."""
     section_id = create_section(client, auth_headers).json()["id"]
     task_id = client.post(
         "/api/tasks/", json={"title": "Dentro da seção", "section_id": section_id}, headers=auth_headers
@@ -44,7 +44,10 @@ def test_deleting_section_cascades_to_its_tasks(client, auth_headers):
 
     client.delete(f"/api/sections/{section_id}", headers=auth_headers)
 
-    assert client.get(f"/api/tasks/{task_id}", headers=auth_headers).status_code == 404
+    task = client.get(f"/api/tasks/{task_id}", headers=auth_headers)
+    assert task.status_code == 200
+    assert task.json()["section_id"] is None
+    assert task.json()["title"] == "Dentro da seção"
 
 
 def test_sections_isolated_between_users(client, auth_headers):
