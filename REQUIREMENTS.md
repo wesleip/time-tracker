@@ -15,7 +15,7 @@ Sistema de gerenciamento de tarefas pessoais (todo list) inspirado em Todoist e 
 - [x] Excluir tarefa
 - [x] Marcar como concluída / reabrir
 - [x] Visualizar lista de tarefas com filtros
-- [ ] Filtrar por: todas, hoje, semana, concluídas
+- [x] Filtrar por: todas, hoje, semana, concluídas
 - [x] Filtrar por seção
 - [x] Busca por título/descrição
 

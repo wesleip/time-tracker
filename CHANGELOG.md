@@ -11,6 +11,8 @@
 - Prioridade 1–4 com cor e ordenação (urgente → baixa, concluídas ao final)
 - Página Tarefas com filtros de status e seção, busca e destaque de atrasadas / vence hoje
 - Vínculo opcional de tarefa com projeto: seletor no formulário, filtro por projeto na listagem e badge do projeto no card
+- Filtros rápidos por prazo: "Vence hoje" e "Esta semana" (segunda–domingo)
+- Correção do tratamento de data na tela de Tarefas: `new Date("YYYY-MM-DD")` é interpretado como UTC e deslocava um dia em fusos negativos (UTC-3). No Brasil, a tarefa que vence hoje aparecia como "(atrasada)" e com a data de ontem. Agora as datas são comparadas como texto local
 
 ### Notificações
 

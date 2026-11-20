@@ -45,24 +45,39 @@ const statusFilters = [
   { value: "completed", label: "Concluídas" },
 ];
 
+// Datas chegam como "YYYY-MM-DD". new Date("2026-11-19") é interpretado como UTC
+// e vira o dia anterior em fusos negativos (UTC-3) — por isso o parse local explícito.
+function toISODate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseLocalDate(dateStr: string): Date {
+  return new Date(`${dateStr}T00:00:00`);
+}
+
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("pt-BR");
+  return parseLocalDate(dateStr).toLocaleDateString("pt-BR");
 }
 
 function isOverdue(dateStr: string | null): boolean {
   if (!dateStr) return false;
-  const due = new Date(dateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return due < today;
+  return dateStr < toISODate(new Date());
 }
 
 function isDueToday(dateStr: string | null): boolean {
   if (!dateStr) return false;
-  const due = new Date(dateStr);
-  const today = new Date();
-  return due.toDateString() === today.toDateString();
+  return dateStr === toISODate(new Date());
+}
+
+function startOfWeek(date: Date): Date {
+  const start = new Date(date);
+  const offset = (date.getDay() + 6) % 7; // segunda-feira = 0
+  start.setDate(date.getDate() - offset);
+  return start;
 }
 
 const priorityColors: Record<number, string> = {
@@ -76,6 +91,7 @@ export function Tasks() {
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "">("");
   const [filterSection, setFilterSection] = useState<string>("");
   const [filterProject, setFilterProject] = useState<string>("");
+  const [filterWhen, setFilterWhen] = useState<"" | "today" | "week">("");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -112,12 +128,23 @@ export function Tasks() {
 
   const filteredTasks = useMemo(() => {
     if (!tasks) return [];
-    return [...tasks].sort((a, b) => {
+    const sorted = [...tasks].sort((a, b) => {
       if (a.status === "completed" && b.status !== "completed") return 1;
       if (a.status !== "completed" && b.status === "completed") return -1;
       return a.priority - b.priority;
     });
-  }, [tasks]);
+    if (!filterWhen) return sorted;
+
+    const today = toISODate(new Date());
+    const weekStart = toISODate(startOfWeek(new Date()));
+    const weekEnd = toISODate(new Date(startOfWeek(new Date()).getTime() + 6 * 86400000));
+
+    return sorted.filter((task) => {
+      if (!task.dueDate) return false;
+      if (filterWhen === "today") return task.dueDate === today;
+      return task.dueDate >= weekStart && task.dueDate <= weekEnd;
+    });
+  }, [tasks, filterWhen]);
 
   const tasksBySection = useMemo(() => {
     const map = new Map<string | null, Task[]>();
@@ -252,6 +279,17 @@ export function Tasks() {
             onChange={(e) => setFilterProject(e.target.value)}
             className="!py-1.5 min-w-[140px]"
           />
+          <Select
+            label=""
+            options={[
+              { value: "", label: "Qualquer prazo" },
+              { value: "today", label: "Vence hoje" },
+              { value: "week", label: "Esta semana" },
+            ]}
+            value={filterWhen}
+            onChange={(e) => setFilterWhen(e.target.value as "" | "today" | "week")}
+            className="!py-1.5 min-w-[140px]"
+          />
           <Button onClick={handleNew}>+ Nova Tarefa</Button>
           <Button variant="secondary" onClick={handleNewSection}>+ Seção</Button>
         </div>
@@ -261,7 +299,7 @@ export function Tasks() {
         {!isLoading && filteredTasks.length === 0 && (
           <Card className="p-8 text-center">
             <p className="text-text-muted text-sm">
-              {search || filterStatus || filterSection || filterProject
+              {search || filterStatus || filterSection || filterProject || filterWhen
                 ? "Nenhuma tarefa encontrada."
                 : "Nenhuma tarefa cadastrada."}
             </p>
