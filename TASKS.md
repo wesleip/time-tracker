@@ -30,6 +30,7 @@
 - [x] Sugerir registro de tempo ao concluir tarefa com projeto
 - [x] Reordenação de seções e navegação rápida de data na tela de Tarefas
 - [x] Seções vazias visíveis na lista de tarefas
+- [x] Testes frontend (Vitest): datas locais, filtro de prazo e componentes de UI
 
 ## Futuro
 
@@ -38,6 +39,5 @@
 - [ ] Timesheet automático
 - [ ] Integração Jira
 - [ ] Integração Azure DevOps
-- [ ] Testes frontend (Vitest)
 - [ ] Refresh token
 - [ ] Paginação de registros

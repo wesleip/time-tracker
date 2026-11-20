@@ -56,6 +56,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 │   │   └── main.py            # App factory, CORS, error handlers
 │   ├── alembic/               # Database migrations
 │   ├── tests/                 # pytest (auth, projetos, registros, tarefas, seções, notificações, admin)
+│   ├── src/test/              # setup do Vitest (jsdom + Testing Library)
 │   ├── Dockerfile             # python:3.12-alpine
 │   ├── pyproject.toml         # Poetry dependencies
 │   └── run.py                 # Uvicorn dev runner
@@ -286,6 +287,12 @@ python run.py          # → http://localhost:3001
 cd api
 pip install -r requirements-dev.txt
 pytest tests/ -v
+```
+
+```bash
+cd frontend
+npm install
+npm test          # Vitest (jsdom + Testing Library)
 ```
 
 ## Arquitetura
