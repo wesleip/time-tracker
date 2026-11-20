@@ -71,6 +71,7 @@ O token carrega a versão de sessão do usuário (`ver`), comparada com `users.t
 | `GET` | `/reports/daily` | `report_date=YYYY-MM-DD` | Total do dia por projeto |
 | `GET` | `/reports/weekly` | `report_date=YYYY-MM-DD` | Semana seg–dom que contém a data |
 | `GET` | `/reports/monthly` | `month=YYYY-MM` | Total do mês por dia e por projeto |
+| `GET` | `/reports/monthly/pdf` | `month=YYYY-MM` | Mesmo relatório em PDF (`application/pdf`, download) |
 
 ### Tarefas — 7
 

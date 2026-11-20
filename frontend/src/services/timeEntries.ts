@@ -45,3 +45,11 @@ export async function fetchMonthlyReport(month: string): Promise<MonthlyReport> 
   const { data } = await api.get<MonthlyReport>("/reports/monthly", { params: { month } });
   return data;
 }
+
+export async function fetchMonthlyReportPdf(month: string): Promise<Blob> {
+  const { data } = await api.get<Blob>("/reports/monthly/pdf", {
+    params: { month },
+    responseType: "blob",
+  });
+  return data;
+}

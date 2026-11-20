@@ -35,10 +35,10 @@
 - [x] Exportar CSV do relatório mensal (gerado no navegador, sem endpoint novo)
 - [x] Timesheet automático (visão Planilha do Relatório Mensal: dias × projetos)
 - [x] Revogação de sessão: `POST /auth/logout` invalida os tokens do usuário (`users.token_version`)
+- [x] Exportar PDF do relatório mensal (`GET /api/reports/monthly/pdf`, gerador próprio sem dependência nova)
 
 ## Futuro
 
-- [ ] Exportar PDF (por ora: CSV + "Imprimir → Salvar como PDF" do navegador)
-- [ ] Integração Jira
-- [ ] Integração Azure DevOps
+- [ ] Integração Jira — precisa de credenciais (base URL, e-mail, API token e project key) para ser validada de verdade
+- [ ] Integração Azure DevOps — idem: organização, PAT e URL do board
 - [ ] Refresh token — adiado: o access token já dura 7 dias e agora o logout revoga de verdade, então o ganho seria só encurtar a janela de exposição. Um refresh de verdade exige tabela `refresh_tokens`, rotação com detecção de reuso, `/auth/refresh` e interceptor no axios (enfileirando requisições concorrentes)

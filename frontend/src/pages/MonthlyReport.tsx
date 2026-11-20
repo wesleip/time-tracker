@@ -5,7 +5,9 @@ import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { Timesheet } from "../components/reports/Timesheet";
 import { useMonthlyReport } from "../hooks/useEntries";
+import { fetchMonthlyReportPdf } from "../services/timeEntries";
 import { downloadCsv, toCsv } from "../utils/csv";
+import { downloadBlob } from "../utils/download";
 import { formatMonthYear } from "../utils/date";
 
 type View = "list" | "sheet";
@@ -15,6 +17,7 @@ export function MonthlyReportPage() {
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const [month, setMonth] = useState(currentMonth);
   const [view, setView] = useState<View>("list");
+  const [pdfError, setPdfError] = useState(false);
   const { data: report, isLoading, isError } = useMonthlyReport(month);
 
   function changeMonth(delta: number) {
@@ -33,6 +36,16 @@ export function MonthlyReportPage() {
     }
     rows.push(["Total", "", report.totalHours]);
     downloadCsv(`relatorio-${month}.csv`, toCsv(rows));
+  }
+
+  async function exportPdf() {
+    setPdfError(false);
+    try {
+      const blob = await fetchMonthlyReportPdf(month);
+      downloadBlob(`relatorio-${month}.pdf`, blob);
+    } catch {
+      setPdfError(true);
+    }
   }
 
   return (
@@ -66,7 +79,18 @@ export function MonthlyReportPage() {
           >
             Exportar CSV
           </Button>
+          <Button
+            variant="secondary"
+            onClick={exportPdf}
+            disabled={!report || report.days.length === 0}
+          >
+            Exportar PDF
+          </Button>
         </div>
+
+        {pdfError && (
+          <p className="text-sm text-error">Não foi possível gerar o PDF. Tente novamente.</p>
+        )}
 
         {isError && (
           <p className="text-sm text-error">Erro ao carregar relatório. Tente novamente.</p>

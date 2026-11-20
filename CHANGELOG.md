@@ -82,6 +82,12 @@
 - Frontend limpa o token local imediatamente e dispara o `POST` em seguida (com o token capturado antes); se a chamada falhar, a saída não trava — o token continua válido no servidor até expirar
 - Optei por versão de sessão em vez de tabela de revogação por token: o `get_current_user` já carrega o usuário, então a validação custa zero query extra e não precisa de limpeza de registros expirados
 
+### PDF
+
+- Novo `GET /api/reports/monthly/pdf?month=YYYY-MM` devolve o relatório mensal em PDF (`application/pdf`, `Content-Disposition: attachment`) e a tela de Relatório Mensal ganha o botão **Exportar PDF**
+- O PDF é gerado no backend por um escritor próprio (`app/services/report_pdf.py`, ~150 linhas) em vez de adicionar `reportlab`/`fpdf2`: essas libs puxam Pillow e fontTools (~45 MB na imagem de runtime) para gerar uma tabela simples. O gerador usa as fontes base Helvetica com WinAnsi (acentos em pt-BR saem corretos), quebra de página e rodapé com numeração
+- Se um dia o relatório ganhar layout complexo, imagens ou fontes customizadas, o certo é trocar o gerador por `reportlab` — o resto da rota não muda
+
 ### Relatórios
 
 - Tela de Relatório Mensal ganha botão **Exportar CSV** (um registro por dia/projeto, mais a linha de total), com `;` como separador, vírgula decimal e BOM UTF-8 — abre direto no Excel e no LibreOffice em pt-BR sem ajuste de importação. Geração no navegador: sem endpoint novo e sem dependência

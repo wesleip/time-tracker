@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.models.user import User
 from app.repositories.entry_repository import EntryRepository
 from app.schemas.report import DailyReport, MonthlyReport, WeeklyReport
+from app.services.report_pdf import build_monthly_report_pdf
 from app.services.report_service import ReportService
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
@@ -42,3 +43,18 @@ def monthly_report(
     current_user: User = Depends(get_current_user),
 ):
     return service.monthly(month, current_user)
+
+
+@router.get("/monthly/pdf")
+def monthly_report_pdf(
+    month: str = Query(..., pattern=r"^\d{4}-\d{2}$"),
+    service: ReportService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
+):
+    report = service.monthly(month, current_user)
+    pdf = build_monthly_report_pdf(report, current_user.name)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="relatorio-{month}.pdf"'},
+    )
