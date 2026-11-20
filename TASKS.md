@@ -20,7 +20,7 @@
 - [x] Busca/filtro de registros e projetos (client-side)
 - [x] Componente Select unificado em todos os formulários
 - [x] Fix timezone em filtro de registros
-- [x] Testes backend (pytest): auth, projetos, registros
+- [x] Testes backend (pytest): auth, projetos, registros, tarefas, seções, notificações e admin
 - [x] requirements.txt sincronizado com pyproject.toml
 - [x] CI/CD: build multi-arch no GHCR via `docker buildx bake`
 - [x] Tarefas: CRUD, seções, prioridade, vencimento, busca
@@ -39,7 +39,6 @@
 - [ ] Filtros rápidos de tarefas: hoje / semana
 - [ ] Vincular tarefa a projeto pela interface
 - [ ] Sugerir registro de tempo ao concluir tarefa com projeto
-- [ ] Testes de tasks, sections, notifications e admin
 - [ ] Testes frontend (Vitest)
 - [ ] Refresh token
 - [ ] Paginação de registros
