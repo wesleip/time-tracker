@@ -44,6 +44,7 @@
 - `compose.frontend-full.yml` removido: só adicionava `depends_on`, que não é necessário (Nginx resolve `/api` em tempo de request)
 - `compose.override.yaml` removido: como o Compose carrega `compose.override.yaml` automaticamente, o deploy de produção (`docker compose -f compose.yaml up -d`) recebia `DEBUG=true` e as portas 3001/8080 sem querer. As portas de dev agora ficam em `compose.api.yml`/`compose.frontend.yml`, que são stacks de desenvolvimento; produção continua em `compose.yaml`
 - `make up`, `down`, `up-api`, `down-api`, `up-frontend`, `restart` e `logs` usam o mesmo conjunto de arquivos de cada stack
+- `.github/workflows/ci.yml`: novo job `frontend` (Node 24) com `npm ci`, `npm run lint` e `npm run build`; o workflow passa a disparar também com mudanças em `frontend/**`. Antes o lint do frontend podia quebrar sem ninguém notar, já que o CI só rodava pytest em mudanças de `api/**`
 - `frontend/nginx.conf`: upstream do `/api` resolvido em tempo de request (`resolver 127.0.0.11` + `proxy_pass` com variável). Antes, subir o frontend sem a API no mesmo network matava o container com `host not found in upstream`
 
 ### Segurança
