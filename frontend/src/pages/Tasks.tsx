@@ -12,7 +12,7 @@ import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useToggleTask, u
 import { useSections, useCreateSection, useUpdateSection, useDeleteSection } from "../hooks/useSections";
 import { useProjects } from "../hooks/useProjects";
 import { TimeSuggestionModal } from "../components/tasks/TimeSuggestionModal";
-import { toISODate } from "../utils/date";
+import { toISODate, addDays } from "../utils/date";
 import type { Task, Section, TaskStatus } from "../types";
 
 const taskSchema = z.object({
@@ -74,7 +74,6 @@ function startOfWeek(date: Date): Date {
   start.setDate(date.getDate() - offset);
   return start;
 }
-
 const priorityColors: Record<number, string> = {
   1: "bg-red-100 text-red-700 border-red-200",
   2: "bg-orange-100 text-orange-700 border-orange-200",
@@ -82,11 +81,21 @@ const priorityColors: Record<number, string> = {
   4: "bg-gray-100 text-gray-600 border-gray-200",
 };
 
+type WhenFilter = "" | "today" | "tomorrow" | "week" | "nextWeek";
+
+const whenFilters = [
+  { value: "", label: "Qualquer prazo" },
+  { value: "today", label: "Hoje" },
+  { value: "tomorrow", label: "Amanhã" },
+  { value: "week", label: "Esta semana" },
+  { value: "nextWeek", label: "Próxima semana" },
+];
+
 export function Tasks() {
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "">("");
   const [filterSection, setFilterSection] = useState<string>("");
   const [filterProject, setFilterProject] = useState<string>("");
-  const [filterWhen, setFilterWhen] = useState<"" | "today" | "week">("");
+  const [filterWhen, setFilterWhen] = useState<WhenFilter>("");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -132,14 +141,20 @@ export function Tasks() {
     });
     if (!filterWhen) return sorted;
 
-    const today = toISODate(new Date());
-    const weekStart = toISODate(startOfWeek(new Date()));
-    const weekEnd = toISODate(new Date(startOfWeek(new Date()).getTime() + 6 * 86400000));
+    const now = new Date();
+    const today = toISODate(now);
+    const tomorrow = toISODate(addDays(now, 1));
+    const weekStart = startOfWeek(now);
+    const weekEnd = toISODate(addDays(weekStart, 6));
+    const nextWeekStart = toISODate(addDays(weekStart, 7));
+    const nextWeekEnd = toISODate(addDays(weekStart, 13));
 
     return sorted.filter((task) => {
       if (!task.dueDate) return false;
       if (filterWhen === "today") return task.dueDate === today;
-      return task.dueDate >= weekStart && task.dueDate <= weekEnd;
+      if (filterWhen === "tomorrow") return task.dueDate === tomorrow;
+      if (filterWhen === "nextWeek") return task.dueDate >= nextWeekStart && task.dueDate <= nextWeekEnd;
+      return task.dueDate >= toISODate(weekStart) && task.dueDate <= weekEnd;
     });
   }, [tasks, filterWhen]);
 
@@ -310,13 +325,9 @@ export function Tasks() {
           />
           <Select
             label=""
-            options={[
-              { value: "", label: "Qualquer prazo" },
-              { value: "today", label: "Vence hoje" },
-              { value: "week", label: "Esta semana" },
-            ]}
+            options={whenFilters}
             value={filterWhen}
-            onChange={(e) => setFilterWhen(e.target.value as "" | "today" | "week")}
+            onChange={(e) => setFilterWhen(e.target.value as WhenFilter)}
             className="!py-1.5 min-w-[140px]"
           />
           <Button onClick={handleNew}>+ Nova Tarefa</Button>
