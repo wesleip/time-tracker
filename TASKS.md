@@ -13,15 +13,20 @@
 
 - [x] Autenticação multi-usuário com JWT
 - [x] Isolamento de dados por usuário
-- [x] Sidebar responsiva (mobile)
+- [x] Sidebar responsiva (mobile) e recolhível
 - [x] Error states em todas as páginas
 - [x] Confirmação ao excluir projeto (cascade delete)
 - [x] Resumo semanal (frontend + backend)
 - [x] Busca/filtro de registros e projetos (client-side)
 - [x] Componente Select unificado em todos os formulários
 - [x] Fix timezone em filtro de registros
-- [x] Testes backend (pytest): auth, projetos, registros (18 testes)
+- [x] Testes backend (pytest): auth, projetos, registros
 - [x] requirements.txt sincronizado com pyproject.toml
+- [x] CI/CD: build multi-arch no GHCR via `docker buildx bake`
+- [x] Tarefas: CRUD, seções, prioridade, vencimento, busca
+- [x] Recorrência de tarefas (diária, semanal, mensal)
+- [x] Notificações de tarefas vencidas / do dia
+- [x] Painel administrativo (usuários, projetos, registros)
 
 ## Futuro
 
@@ -30,6 +35,11 @@
 - [ ] Timesheet automático
 - [ ] Integração Jira
 - [ ] Integração Azure DevOps
+- [ ] Reordenar seções (drag ou up/down)
+- [ ] Filtros rápidos de tarefas: hoje / semana
+- [ ] Vincular tarefa a projeto pela interface
+- [ ] Sugerir registro de tempo ao concluir tarefa com projeto
+- [ ] Testes de tasks, sections, notifications e admin
 - [ ] Testes frontend (Vitest)
 - [ ] Refresh token
 - [ ] Paginação de registros

@@ -10,40 +10,40 @@ Sistema de gerenciamento de tarefas pessoais (todo list) inspirado em Todoist e 
 
 ### Tarefas (Tasks)
 
-- [ ] Criar tarefa com título (obrigatório) e descrição (opcional)
-- [ ] Editar tarefa (título, descrição, prioridade, data de vencimento)
-- [ ] Excluir tarefa
-- [ ] Marcar como concluída / reabrir
-- [ ] Visualizar lista de tarefas com filtros
+- [x] Criar tarefa com título (obrigatório) e descrição (opcional)
+- [x] Editar tarefa (título, descrição, prioridade, data de vencimento)
+- [x] Excluir tarefa
+- [x] Marcar como concluída / reabrir
+- [x] Visualizar lista de tarefas com filtros
 - [ ] Filtrar por: todas, hoje, semana, concluídas
-- [ ] Filtrar por seção
-- [ ] Busca por título/descrição
+- [x] Filtrar por seção
+- [x] Busca por título/descrição
 
 ### Seções (Sections)
 
-- [ ] Criar seção (nome obrigatório)
-- [ ] Editar seção (nome, cor)
+- [x] Criar seção (nome obrigatório)
+- [x] Editar seção (nome, cor)
 - [ ] Excluir seção (move tarefas para "Sem seção")
 - [ ] Reordenar seções (drag ou up/down)
-- [ ] Seção padrão "Geral" criada automaticamente
+- [x] Seção padrão "Geral" criada automaticamente
 
 ### Recorrência
 
-- [ ] Definir recorrência: diária, semanal, mensal
-- [ ] Ao concluir tarefa recorrente, criar próxima ocorrência automaticamente
-- [ ] Manter referência da tarefa original (parent_id)
+- [x] Definir recorrência: diária, semanal, mensal
+- [x] Ao concluir tarefa recorrente, criar próxima ocorrência automaticamente
+- [x] Manter referência da tarefa original (parent_id)
 
 ### Prioridade
 
-- [ ] 4 níveis: baixa, média, alta, urgente
-- [ ] Representação visual por cor/número (1-4)
-- [ ] Ordenação padrão: urgente → alta → média → baixa
+- [x] 4 níveis: baixa, média, alta, urgente
+- [x] Representação visual por cor/número (1-4)
+- [x] Ordenação padrão: urgente → alta → média → baixa
 
 ### Datas
 
-- [ ] Data de vencimento (due_date) opcional
-- [ ] Destaque visual para tarefas vencidas
-- [ ] Destaque visual para vence hoje
+- [x] Data de vencimento (due_date) opcional
+- [x] Destaque visual para tarefas vencidas
+- [x] Destaque visual para vence hoje
 - [ ] Navegação rápida: hoje, amanhã, próxima semana
 
 ### Integração com Time Tracker
@@ -51,6 +51,8 @@ Sistema de gerenciamento de tarefas pessoais (todo list) inspirado em Todoist e 
 - [ ] Vincular tarefa a um projeto existente (opcional)
 - [ ] Ao concluir tarefa com projeto vinculado, sugerir registro de tempo
 - [ ] Filtro "Vinculadas ao projeto X" na listagem
+
+> **Status (conferido no código em 2026-07):** o modelo e a API aceitam `project_id` e expõem filtro por projeto, mas a interface de Tarefas não oferece seletor de projeto nem filtro. Excluir uma seção **apaga** as tarefas dela (`cascade="all, delete-orphan"`), enquanto este documento prevê movê-las para "Sem seção". Ambos os pontos ficam em aberto no `TASKS.md`.
 
 ## API Endpoints
 
