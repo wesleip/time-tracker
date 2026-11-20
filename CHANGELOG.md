@@ -13,6 +13,9 @@
 - Vínculo opcional de tarefa com projeto: seletor no formulário, filtro por projeto na listagem e badge do projeto no card
 - Filtros rápidos por prazo: "Vence hoje" e "Esta semana" (segunda–domingo)
 - Reordenação de seções com botões ↑/↓ na tela de Tarefas; os grupos passam a seguir a ordem configurada das seções ("Sem seção" por último)
+- Ao concluir uma tarefa com projeto vinculado, a aplicação sugere registrar as horas: modal com horas, data (vencimento da tarefa ou hoje) e descrição (título da tarefa), usando `POST /entries/`. Fechar o modal não registra nada
+- Concluir tarefa pela tela passa a chamar `PATCH /tasks/{id}/complete` em vez de `/toggle`: só o endpoint de conclusão processa a recorrência, que portanto não funcionava pela interface. Reabrir continua usando `/toggle`
+- `toISODate`/`todayISO` movidos para `src/utils/date.ts` e reaproveitados pela tela de Tarefas
 - Correção do tratamento de data na tela de Tarefas: `new Date("YYYY-MM-DD")` é interpretado como UTC e deslocava um dia em fusos negativos (UTC-3). No Brasil, a tarefa que vence hoje aparecia como "(atrasada)" e com a data de ontem. Agora as datas são comparadas como texto local
 
 ### Notificações

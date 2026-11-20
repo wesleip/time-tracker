@@ -8,9 +8,11 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Select } from "../components/ui/Select";
 import { Modal } from "../components/ui/Modal";
-import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useToggleTask } from "../hooks/useTasks";
+import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useToggleTask, useCompleteTask } from "../hooks/useTasks";
 import { useSections, useCreateSection, useUpdateSection, useDeleteSection } from "../hooks/useSections";
 import { useProjects } from "../hooks/useProjects";
+import { TimeSuggestionModal } from "../components/tasks/TimeSuggestionModal";
+import { toISODate } from "../utils/date";
 import type { Task, Section, TaskStatus } from "../types";
 
 const taskSchema = z.object({
@@ -47,13 +49,6 @@ const statusFilters = [
 
 // Datas chegam como "YYYY-MM-DD". new Date("2026-11-19") é interpretado como UTC
 // e vira o dia anterior em fusos negativos (UTC-3) — por isso o parse local explícito.
-function toISODate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function parseLocalDate(dateStr: string): Date {
   return new Date(`${dateStr}T00:00:00`);
 }
@@ -98,6 +93,7 @@ export function Tasks() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [sectionModalOpen, setSectionModalOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
+  const [suggestedTask, setSuggestedTask] = useState<Task | null>(null);
 
   const { data: tasks, isLoading } = useTasks({
     status: filterStatus || undefined,
@@ -112,6 +108,7 @@ export function Tasks() {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const toggleTask = useToggleTask();
+  const completeTask = useCompleteTask();
 
   const createSection = useCreateSection();
   const updateSection = useUpdateSection();
@@ -210,7 +207,16 @@ export function Tasks() {
   }
 
   async function handleToggle(task: Task) {
-    await toggleTask.mutateAsync(task.id);
+    if (task.status === "completed") {
+      // Reabrir: o endpoint de conclusão não volta a tarefa para pendente.
+      await toggleTask.mutateAsync(task.id);
+      return;
+    }
+    // Concluir via /complete para processar a recorrência (cria a próxima ocorrência).
+    await completeTask.mutateAsync(task.id);
+    if (task.projectId) {
+      setSuggestedTask(task);
+    }
   }
 
   async function handleConfirmDelete(id: string) {
@@ -571,6 +577,13 @@ export function Tasks() {
             </div>
           </form>
         </Modal>
+
+        <TimeSuggestionModal
+          key={suggestedTask?.id ?? "none"}
+          task={suggestedTask}
+          projectName={suggestedTask?.projectId ? projectById(suggestedTask.projectId)?.name ?? "" : ""}
+          onClose={() => setSuggestedTask(null)}
+        />
       </div>
     </Layout>
   );
