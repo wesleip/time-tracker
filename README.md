@@ -307,7 +307,7 @@ Paleta baseada em sage green e blue-gray, tons pastel, tipografia Inter (400, 50
 | Arquivo | Conteúdo |
 |---------|----------|
 | `PROJECT.md` | Problema, público-alvo, objetivo, escopo MVP |
-| `REQUIREMENTS.md` | Requisitos funcionais e não-funcionais |
+| `REQUIREMENTS.md` | Requisitos do módulo de Tarefas (tasks, seções, notificações) |
 | `ARCHITECTURE.md` | Arquitetura e conceitos de domínio |
 | `TASKS.md` | Roadmap e tarefas pendentes |
 | `CHANGELOG.md` | Histórico de versões |
