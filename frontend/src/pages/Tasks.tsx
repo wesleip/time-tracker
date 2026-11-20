@@ -153,8 +153,13 @@ export function Tasks() {
       if (!map.has(sectionId)) map.set(sectionId, []);
       map.get(sectionId)!.push(task);
     });
-    return map;
-  }, [filteredTasks]);
+    // Grupos na ordem configurada das seções ("Sem seção" por último).
+    const orderOf = (sectionId: string | null) =>
+      sectionId ? sections?.find((s) => s.id === sectionId)?.order ?? Number.MAX_SAFE_INTEGER : Number.MAX_SAFE_INTEGER;
+    return new Map(
+      [...map.entries()].sort(([a], [b]) => orderOf(a) - orderOf(b))
+    );
+  }, [filteredTasks, sections]);
 
   function getSectionName(sectionId: string | null): string {
     if (!sectionId) return "Sem seção";
@@ -237,6 +242,24 @@ export function Tasks() {
   async function handleDeleteSection(id: string) {
     await deleteSection.mutateAsync(id);
     if (filterSection === id) setFilterSection("");
+  }
+
+  async function handleMoveSection(sectionId: string, direction: "up" | "down") {
+    if (!sections) return;
+    const ordered = [...sections];
+    const index = ordered.findIndex((s) => s.id === sectionId);
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || target < 0 || target >= ordered.length) return;
+
+    const [moved] = ordered.splice(index, 1);
+    ordered.splice(target, 0, moved);
+
+    // Renumera sequencialmente para não depender de trocas de valores iguais.
+    for (const [position, section] of ordered.entries()) {
+      if (section.order !== position) {
+        await updateSection.mutateAsync({ id: section.id, order: position });
+      }
+    }
   }
 
   return (
@@ -322,6 +345,22 @@ export function Tasks() {
                 </h3>
                 {sectionId && (
                   <div className="flex gap-1">
+                    <button
+                      onClick={() => handleMoveSection(sectionId, "up")}
+                      aria-label={`Mover seção ${getSectionName(sectionId)} para cima`}
+                      title="Mover para cima"
+                      className="text-xs text-text-muted hover:text-primary-600 p-1"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => handleMoveSection(sectionId, "down")}
+                      aria-label={`Mover seção ${getSectionName(sectionId)} para baixo`}
+                      title="Mover para baixo"
+                      className="text-xs text-text-muted hover:text-primary-600 p-1"
+                    >
+                      ↓
+                    </button>
                     <button
                       onClick={() => {
                         const section = sections?.find((s) => s.id === sectionId);

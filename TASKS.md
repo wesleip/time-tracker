@@ -35,7 +35,6 @@
 - [ ] Timesheet automático
 - [ ] Integração Jira
 - [ ] Integração Azure DevOps
-- [ ] Reordenar seções (drag ou up/down)
 - [ ] Sugerir registro de tempo ao concluir tarefa com projeto
 - [ ] Testes frontend (Vitest)
 - [ ] Refresh token

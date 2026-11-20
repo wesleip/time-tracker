@@ -50,6 +50,16 @@ def test_deleting_section_keeps_its_tasks(client, auth_headers):
     assert task.json()["title"] == "Dentro da seção"
 
 
+def test_update_section_order_changes_listing(client, auth_headers):
+    first = create_section(client, auth_headers, name="A").json()
+    second = create_section(client, auth_headers, name="B").json()
+
+    client.put(f"/api/sections/{second['id']}", json={"order": -1}, headers=auth_headers)
+
+    listed = client.get("/api/sections/", headers=auth_headers).json()
+    assert [s["id"] for s in listed] == [second["id"], first["id"]]
+
+
 def test_sections_isolated_between_users(client, auth_headers):
     section_id = create_section(client, auth_headers).json()["id"]
     headers_b = second_user_headers(client)

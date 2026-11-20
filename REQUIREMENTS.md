@@ -24,7 +24,7 @@ Sistema de gerenciamento de tarefas pessoais (todo list) inspirado em Todoist e 
 - [x] Criar seção (nome obrigatório)
 - [x] Editar seção (nome, cor)
 - [x] Excluir seção (move tarefas para "Sem seção")
-- [ ] Reordenar seções (drag ou up/down)
+- [x] Reordenar seções (drag ou up/down)
 - [x] Seção padrão "Geral" criada automaticamente
 
 ### Recorrência
