@@ -86,7 +86,7 @@ time-tracker/
 │   └── .dockerignore                # Exclui node_modules/, dist/ local, .env, etc.
 └── .github/
     └── workflows/
-        ├── ci.yml                   # Roda pytest em PRs e pushes para main
+        ├── ci.yml                   # Roda pytest e lint/build do frontend em PRs e pushes para main
         └── build-images.yml         # Builda e publica imagens multi-arch no GHCR
 ```
 
@@ -184,18 +184,27 @@ docker buildx bake release --push
 
 ### Workflow `ci.yml` — Integração Contínua
 
-**Disparo:** Push para `main` ou PR com alterações em `api/**`
+**Disparo:** Push para `main` ou PR com alterações em `api/**`, `frontend/**` ou no próprio workflow
 
 ```
 git push / PR → ci.yml
-                   └── job: test
-                           ├── checkout
-                           ├── setup Python 3.12 (cache pip)
-                           ├── pip install requirements.txt + requirements-dev.txt
-                           └── pytest -v
+                   ├── job: test (backend)
+                   │      ├── checkout
+                   │      ├── setup Python 3.12 (cache pip)
+                   │      ├── pip install requirements.txt + requirements-dev.txt
+                   │      └── pytest -v
+                   │
+                   └── job: frontend (Node 24)
+                          ├── checkout
+                          ├── setup Node 24 (cache npm)
+                          ├── npm ci
+                          ├── npm run lint (ESLint)
+                          └── npm run build (tsc -b + vite build)
 ```
 
 Os testes usam SQLite in-memory (configurado em `api/tests/conftest.py` com `StaticPool`) — não há dependência de PostgreSQL em CI.
+
+O job de frontend roda em paralelo com o de backend e garante lint e tipagem antes do build das imagens.
 
 ### Workflow `build-images.yml` — Build e Publicação
 
