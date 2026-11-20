@@ -32,11 +32,11 @@
 - [x] Seções vazias visíveis na lista de tarefas
 - [x] Paginação de registros e tarefas (`limit`/`offset` + header `X-Total-Count`)
 - [x] Testes frontend (Vitest): datas locais, filtro de prazo e componentes de UI
+- [x] Exportar CSV do relatório mensal (gerado no navegador, sem endpoint novo)
 
 ## Futuro
 
-- [ ] Exportar CSV
-- [ ] Exportar PDF
+- [ ] Exportar PDF (por ora: CSV + "Imprimir → Salvar como PDF" do navegador)
 - [ ] Timesheet automático
 - [ ] Integração Jira
 - [ ] Integração Azure DevOps

@@ -75,6 +75,10 @@
 - O total da consulta (respeitando os filtros) vai no header `X-Total-Count`, exposto no CORS
 - Tela de Tarefas passa a carregar 50 por vez, com botão "Carregar mais" e contador "Mostrando X de Y"; trocar de filtro volta para a primeira página
 
+### Relatórios
+
+- Tela de Relatório Mensal ganha botão **Exportar CSV** (um registro por dia/projeto, mais a linha de total), com `;` como separador, vírgula decimal e BOM UTF-8 — abre direto no Excel e no LibreOffice em pt-BR sem ajuste de importação. Geração no navegador: sem endpoint novo e sem dependência
+
 ### Documentação
 
 - `ARCHITECTURE.md`, `docs/api-spec.md`, `docs/glossary.md` e `README.md` sincronizados com o código
