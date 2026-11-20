@@ -331,7 +331,7 @@ Pages → Hooks (TanStack Query) → Services (Axios) → API
 | Coluna | Tipo | Restrição |
 |--------|------|-----------|
 | `id` | String(36) | PK, UUID |
-| `user_id` | String(36) | FK → users.id |
+| `user_id` | String(36) | FK → users.id, NOT NULL |
 | `name` | String(255) | NOT NULL |
 | `description` | Text | nullable |
 | `color` | String(7) | NOT NULL, default `#6366f1` |
