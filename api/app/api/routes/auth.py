@@ -28,3 +28,11 @@ def login(data: UserLogin, service: AuthService = Depends(get_service)):
 @router.get("/me", response_model=UserResponse)
 def me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(
+    service: AuthService = Depends(get_service),
+    current_user: User = Depends(get_current_user),
+):
+    service.logout(current_user)

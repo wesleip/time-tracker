@@ -75,6 +75,13 @@
 - O total da consulta (respeitando os filtros) vai no header `X-Total-Count`, exposto no CORS
 - Tela de Tarefas passa a carregar 50 por vez, com botão "Carregar mais" e contador "Mostrando X de Y"; trocar de filtro volta para a primeira página
 
+### Sessão
+
+- `users.token_version` (migração `d4e5f6a7b8c9`) e a claim `ver` no JWT: o `GET /auth/me` e todas as rotas autenticadas comparam a versão do token com a do usuário
+- `POST /auth/logout` incrementa a versão e revoga **todos** os tokens do usuário — antes o logout era só no navegador e o token seguia válido por 7 dias. Tokens emitidos antes da migração (sem `ver`) valem como versão 0, então ninguém é deslogado pelo deploy
+- Frontend limpa o token local imediatamente e dispara o `POST` em seguida (com o token capturado antes); se a chamada falhar, a saída não trava — o token continua válido no servidor até expirar
+- Optei por versão de sessão em vez de tabela de revogação por token: o `get_current_user` já carrega o usuário, então a validação custa zero query extra e não precisa de limpeza de registros expirados
+
 ### Relatórios
 
 - Tela de Relatório Mensal ganha botão **Exportar CSV** (um registro por dia/projeto, mais a linha de total), com `;` como separador, vírgula decimal e BOM UTF-8 — abre direto no Excel e no LibreOffice em pt-BR sem ajuste de importação. Geração no navegador: sem endpoint novo e sem dependência

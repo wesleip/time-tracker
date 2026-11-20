@@ -56,3 +56,52 @@ def test_me_returns_user(client, auth_headers):
 def test_me_without_token_returns_401(client):
     response = client.get("/api/auth/me")
     assert response.status_code in (401, 403)  # HTTPBearer raises 403; some versions raise 401
+
+
+def test_logout_revokes_token(client, auth_headers):
+    assert client.post("/api/auth/logout", headers=auth_headers).status_code == 204
+    assert client.get("/api/auth/me", headers=auth_headers).status_code == 401
+
+
+def test_login_after_logout_works(client, auth_headers):
+    client.post("/api/auth/logout", headers=auth_headers)
+    token = client.post("/api/auth/login", json={
+        "email": "test@example.com", "password": "password123"
+    }).json()["access_token"]
+
+    assert client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+
+
+def test_logout_does_not_affect_other_users(client, auth_headers):
+    client.post("/api/auth/register", json={
+        "email": "other@example.com", "name": "Other", "password": "pass123"
+    })
+    other_token = client.post("/api/auth/login", json={
+        "email": "other@example.com", "password": "pass123"
+    }).json()["access_token"]
+
+    client.post("/api/auth/logout", headers=auth_headers)
+
+    assert client.get(
+        "/api/auth/me", headers={"Authorization": f"Bearer {other_token}"}
+    ).status_code == 200
+
+
+def test_token_without_version_still_works(client, auth_headers):
+    # Tokens emitidos antes da migração não têm "ver"; precisam continuar válidos.
+    import jwt
+    from datetime import datetime, timedelta, timezone
+    from app.core.config import settings
+
+    user = client.get("/api/auth/me", headers=auth_headers).json()
+    legacy = jwt.encode(
+        {"sub": user["id"], "exp": datetime.now(timezone.utc) + timedelta(minutes=5)},
+        settings.jwt_secret,
+        algorithm="HS256",
+    )
+
+    assert client.get("/api/auth/me", headers={"Authorization": f"Bearer {legacy}"}).status_code == 200
+
+
+def test_logout_requires_auth(client):
+    assert client.post("/api/auth/logout").status_code in (401, 403)

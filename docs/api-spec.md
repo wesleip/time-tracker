@@ -17,6 +17,8 @@ Authorization: Bearer <token>
 
 O token vem de `POST /auth/login`. Cada usuário só enxerga os próprios dados (filtro por `user_id` no repositório). Rotas `/admin/*` exigem `is_admin`.
 
+O token carrega a versão de sessão do usuário (`ver`), comparada com `users.token_version` a cada requisição. `POST /auth/logout` incrementa essa versão e invalida **todos** os tokens já emitidos para o usuário — inclusive os de outros dispositivos. Tokens antigos, sem `ver`, são tratados como versão 0 e continuam válidos até expirar.
+
 ## Convenções
 
 | Item | Padrão |
@@ -39,6 +41,7 @@ O token vem de `POST /auth/login`. Cada usuário só enxerga os próprios dados 
 | `POST` | `/auth/register` | Cria conta — devolve token |
 | `POST` | `/auth/login` | Login — devolve token |
 | `GET` | `/auth/me` | Usuário autenticado |
+| `POST` | `/auth/logout` | Revoga os tokens do usuário (204) |
 
 ### Health — 1
 

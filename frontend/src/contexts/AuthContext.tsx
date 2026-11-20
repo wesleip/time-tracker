@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import * as authService from "../services/auth";
-import { clearToken, setToken } from "../services/client";
+import { clearToken, getToken, setToken } from "../services/client";
 import { AuthContext } from "./auth-context";
 import type { User } from "../types";
 
@@ -35,8 +35,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    const token = getToken();
     clearToken();
     setUser(null);
+    // Revogação no servidor não pode travar a saída: token local já foi limpo.
+    if (token) authService.logout(token).catch(() => {});
   }
 
   return (

@@ -83,6 +83,7 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 | `POST` | `/api/auth/register` | Criar conta |
 | `POST` | `/api/auth/login` | Login — retorna JWT |
 | `GET` | `/api/auth/me` | Dados do usuário autenticado |
+| `POST` | `/api/auth/logout` | Revoga os tokens do usuário |
 
 > Todas as rotas abaixo exigem `Authorization: Bearer <token>`.
 
