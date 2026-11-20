@@ -1,27 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card } from "../../components/ui/Card";
-import * as adminService from "../../services/admin";
-import type { AdminTimeLog, AdminUser } from "../../services/admin";
+import { useAdminTimeLogs, useAdminUsers } from "../../hooks/useAdmin";
 
 export function AdminTimeLogs() {
-  const [logs, setLogs] = useState<AdminTimeLog[]>([]);
-  const [users, setUsers] = useState<AdminUser[]>([]);
   const [selectedUser, setSelectedUser] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-
-  useEffect(() => {
-    adminService.getUsers().then(setUsers).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    setIsLoading(true);
-    setIsError(false);
-    adminService.getTimeLogs(selectedUser || undefined)
-      .then(setLogs)
-      .catch(() => setIsError(true))
-      .finally(() => setIsLoading(false));
-  }, [selectedUser]);
+  const { data: users = [] } = useAdminUsers();
+  const { data: logs = [], isLoading, isError } = useAdminTimeLogs(selectedUser || undefined);
 
   return (
     <div className="space-y-4">

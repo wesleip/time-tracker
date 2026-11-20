@@ -3,7 +3,7 @@ import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import * as adminService from "../../services/admin";
 import type { AdminUser } from "../../services/admin";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 export function AdminUsers() {
   const { user: currentUser } = useAuth();
