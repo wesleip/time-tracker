@@ -22,7 +22,7 @@ Antes de qualquer alteração ou geração de código, leia e utilize como fonte
 * README.md
 * PROJECT.md
 * REQUIREMENTS.md
-* DESIGN.md
+* design-system/design-system.md
 * ARCHITECTURE.md
 * WORKFLOW.md
 * TASKS.md
@@ -151,7 +151,7 @@ Sempre que fizer sentido.
 
 # Design System
 
-A referência visual obrigatória é o arquivo DESIGN.md.
+A referência visual obrigatória é `design-system/design-system.md`.
 
 Regras:
 
@@ -298,17 +298,7 @@ Sempre execute o seguinte fluxo:
 
 # Definition of Done
 
-Uma tarefa somente está concluída quando:
-
-* Requisito implementado.
-* Código revisado.
-* Tipagem correta.
-* Sem warnings.
-* Sem erros de lint.
-* Documentação atualizada.
-* Changelog atualizado.
-* Seguindo DESIGN.md.
-* Seguindo requisitos de segurança.
+Checklist único em `agents/definition-of-done.md`.
 
 ---
 

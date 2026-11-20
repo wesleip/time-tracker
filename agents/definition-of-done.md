@@ -1,9 +1,15 @@
 # Definition of Done
 
-Uma tarefa é considerada concluída quando:
+Uma tarefa somente está concluída quando:
 
-- Implementação finalizada
+- Requisito implementado
 - Testes executados
+- Tipagem correta
+- Sem warnings
+- Sem erros de lint
 - Documentação atualizada
+- Changelog atualizado
+- Seguindo `design-system/design-system.md`
+- Requisitos de segurança atendidos
 - Revisão concluída
 - Sem erros conhecidos críticos
