@@ -36,6 +36,7 @@
 - [x] Timesheet automático (visão Planilha do Relatório Mensal: dias × projetos)
 - [x] Revogação de sessão: `POST /auth/logout` invalida os tokens do usuário (`users.token_version`)
 - [x] Exportar PDF do relatório mensal (`GET /api/reports/monthly/pdf`, gerador próprio sem dependência nova)
+- [x] Testes de componente da tela de Tarefas (API mockada, 7 casos)
 
 ## Futuro
 

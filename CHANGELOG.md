@@ -36,8 +36,10 @@
 
 - 22 novos testes: tarefas (CRUD, filtros, recorrência, isolamento), seções (incluindo o destino das tarefas ao excluir a seção), notificações (contador, leitura, isolamento) e smoke do admin
 - Suite backend passa de 18 para 40 testes
-- Testes no frontend com Vitest (jsdom + Testing Library): 22 testes cobrindo datas locais, filtro de prazo por tarefas e um componente de UI. `npm test` entra no job de frontend do CI
+- Testes no frontend com Vitest (jsdom + Testing Library): 37 testes cobrindo datas locais, filtro de prazo por tarefas, um componente de UI e a tela de Tarefas inteira (API mockada). `npm test` entra no job de frontend do CI
 - Lógica de filtro por prazo extraída da tela de Tarefas para `src/utils/taskFilters.ts` — testável sem DOM
+- Testes de componente da tela de Tarefas (`src/pages/Tasks.test.tsx`, 7 casos): API mockada por serviço, cobrindo renderização, agrupamento por seção, seções vazias, paginação ("Carregar mais"), contador "Mostrando X de Y" e envio dos filtros de status e busca. Total do frontend: **37 testes**
+- Os filtros da tela de Tarefas ganharam `aria-label` ("Filtrar por status", "Filtrar por seção", "Filtrar por projeto", "Filtrar por prazo") e a busca ganhou "Buscar tarefas" — antes eram quatro `select` sem nome acessível, ilegíveis por leitor de tela
 
 ### Infra
 

@@ -294,6 +294,7 @@ export function Tasks() {
           <div className="flex-1 min-w-[200px]">
             <Input
               label=""
+              aria-label="Buscar tarefas"
               placeholder="Buscar tarefas..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -302,6 +303,7 @@ export function Tasks() {
           </div>
           <Select
             label=""
+            aria-label="Filtrar por status"
             options={statusFilters}
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as TaskStatus | "")}
@@ -309,6 +311,7 @@ export function Tasks() {
           />
           <Select
             label=""
+            aria-label="Filtrar por seção"
             options={[
               { value: "", label: "Todas seções" },
               ...(sections?.map((s) => ({ value: s.id, label: s.name })) ?? []),
@@ -319,6 +322,7 @@ export function Tasks() {
           />
           <Select
             label=""
+            aria-label="Filtrar por projeto"
             options={[
               { value: "", label: "Todos os projetos" },
               ...(projects?.map((p) => ({ value: p.id, label: p.name })) ?? []),
@@ -329,6 +333,7 @@ export function Tasks() {
           />
           <Select
             label=""
+            aria-label="Filtrar por prazo"
             options={whenFilters}
             value={filterWhen}
             onChange={(e) => setFilterWhen(e.target.value as WhenFilter)}
