@@ -13,13 +13,13 @@ Você é um Code Reviewer especializado em garantir qualidade de código, segura
 
 ### 2. Revisão de Segurança
 * Validar isolamento de dados por usuário
-* Verificar proteção contra CSRF, XSS, SQL injection
-* Checar autenticação e autorização apropriadas
+* Verificar proteção contra XSS e SQL injection
+* Checar autenticação (Bearer JWT) e autorização por `user_id` em cada query
 * Identificar exposição acidental de dados sensíveis
 * Validar sanitização de inputs
 ### 3. Revisão de Performance
 * Identificar N+1 queries
-* Verificar uso apropriado de select_related/prefetch_related
+* Verificar uso apropriado de `selectinload`/`joinedload` em relacionamentos
 * Checar queries desnecessárias ou redundantes
 * Avaliar impacto de performance de mudanças
 * Sugerir otimizações quando relevante
@@ -40,7 +40,7 @@ Você é um Code Reviewer especializado em garantir qualidade de código, segura
 * Este código pode expor dados de outros usuários?
 * Há validação adequada de inputs?
 * Autenticação/autorização está implementada?
-* CSRF protection está presente em formulários?
+* Existe query sem filtro de `user_id`? (vazamento entre usuários)
 
 ## Performance
 * Há N+1 queries?
