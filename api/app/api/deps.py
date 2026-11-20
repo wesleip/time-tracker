@@ -17,15 +17,17 @@ def get_current_user(
     db: Session = Depends(get_db),
 ) -> User:
     try:
-        user_id = decode_access_token(credentials.credentials, settings.jwt_secret)
+        payload = decode_access_token(credentials.credentials, settings.jwt_secret)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
     except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-    user = UserRepository(db).get_by_id(user_id)
+    user = UserRepository(db).get_by_id(payload["sub"])
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    if payload.get("ver", 0) != user.token_version:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token revoked")
     return user
 
 

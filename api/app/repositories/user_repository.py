@@ -19,3 +19,7 @@ class UserRepository:
         self.db.commit()
         self.db.refresh(user)
         return user
+
+    def revoke_tokens(self, user: User) -> None:
+        user.token_version += 1
+        self.db.commit()

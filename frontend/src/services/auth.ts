@@ -20,3 +20,8 @@ export async function me(): Promise<User> {
   const { data } = await api.get<User>("/auth/me");
   return data;
 }
+
+export async function logout(token: string): Promise<void> {
+  // Token enviado explicitamente: o AuthContext limpa o localStorage antes desta chamada.
+  await api.post("/auth/logout", null, { headers: { Authorization: `Bearer ${token}` } });
+}
