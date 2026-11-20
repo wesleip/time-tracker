@@ -1,4 +1,10 @@
+import os
+
 import pytest
+
+# Settings are loaded on import; JWT_SECRET has no default, so set a test-only value first.
+os.environ.setdefault("JWT_SECRET", "test-only-secret")
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
