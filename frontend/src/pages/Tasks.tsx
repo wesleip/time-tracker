@@ -45,24 +45,39 @@ const statusFilters = [
   { value: "completed", label: "Concluídas" },
 ];
 
+// Datas chegam como "YYYY-MM-DD". new Date("2026-11-19") é interpretado como UTC
+// e vira o dia anterior em fusos negativos (UTC-3) — por isso o parse local explícito.
+function toISODate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseLocalDate(dateStr: string): Date {
+  return new Date(`${dateStr}T00:00:00`);
+}
+
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString("pt-BR");
+  return parseLocalDate(dateStr).toLocaleDateString("pt-BR");
 }
 
 function isOverdue(dateStr: string | null): boolean {
   if (!dateStr) return false;
-  const due = new Date(dateStr);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return due < today;
+  return dateStr < toISODate(new Date());
 }
 
 function isDueToday(dateStr: string | null): boolean {
   if (!dateStr) return false;
-  const due = new Date(dateStr);
-  const today = new Date();
-  return due.toDateString() === today.toDateString();
+  return dateStr === toISODate(new Date());
+}
+
+function startOfWeek(date: Date): Date {
+  const start = new Date(date);
+  const offset = (date.getDay() + 6) % 7; // segunda-feira = 0
+  start.setDate(date.getDate() - offset);
+  return start;
 }
 
 const priorityColors: Record<number, string> = {
@@ -76,6 +91,7 @@ export function Tasks() {
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "">("");
   const [filterSection, setFilterSection] = useState<string>("");
   const [filterProject, setFilterProject] = useState<string>("");
+  const [filterWhen, setFilterWhen] = useState<"" | "today" | "week">("");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -112,12 +128,23 @@ export function Tasks() {
 
   const filteredTasks = useMemo(() => {
     if (!tasks) return [];
-    return [...tasks].sort((a, b) => {
+    const sorted = [...tasks].sort((a, b) => {
       if (a.status === "completed" && b.status !== "completed") return 1;
       if (a.status !== "completed" && b.status === "completed") return -1;
       return a.priority - b.priority;
     });
-  }, [tasks]);
+    if (!filterWhen) return sorted;
+
+    const today = toISODate(new Date());
+    const weekStart = toISODate(startOfWeek(new Date()));
+    const weekEnd = toISODate(new Date(startOfWeek(new Date()).getTime() + 6 * 86400000));
+
+    return sorted.filter((task) => {
+      if (!task.dueDate) return false;
+      if (filterWhen === "today") return task.dueDate === today;
+      return task.dueDate >= weekStart && task.dueDate <= weekEnd;
+    });
+  }, [tasks, filterWhen]);
 
   const tasksBySection = useMemo(() => {
     const map = new Map<string | null, Task[]>();
@@ -126,8 +153,13 @@ export function Tasks() {
       if (!map.has(sectionId)) map.set(sectionId, []);
       map.get(sectionId)!.push(task);
     });
-    return map;
-  }, [filteredTasks]);
+    // Grupos na ordem configurada das seções ("Sem seção" por último).
+    const orderOf = (sectionId: string | null) =>
+      sectionId ? sections?.find((s) => s.id === sectionId)?.order ?? Number.MAX_SAFE_INTEGER : Number.MAX_SAFE_INTEGER;
+    return new Map(
+      [...map.entries()].sort(([a], [b]) => orderOf(a) - orderOf(b))
+    );
+  }, [filteredTasks, sections]);
 
   function getSectionName(sectionId: string | null): string {
     if (!sectionId) return "Sem seção";
@@ -212,6 +244,24 @@ export function Tasks() {
     if (filterSection === id) setFilterSection("");
   }
 
+  async function handleMoveSection(sectionId: string, direction: "up" | "down") {
+    if (!sections) return;
+    const ordered = [...sections];
+    const index = ordered.findIndex((s) => s.id === sectionId);
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || target < 0 || target >= ordered.length) return;
+
+    const [moved] = ordered.splice(index, 1);
+    ordered.splice(target, 0, moved);
+
+    // Renumera sequencialmente para não depender de trocas de valores iguais.
+    for (const [position, section] of ordered.entries()) {
+      if (section.order !== position) {
+        await updateSection.mutateAsync({ id: section.id, order: position });
+      }
+    }
+  }
+
   return (
     <Layout title="Tarefas">
       <div className="p-4 md:p-6 space-y-6">
@@ -252,6 +302,17 @@ export function Tasks() {
             onChange={(e) => setFilterProject(e.target.value)}
             className="!py-1.5 min-w-[140px]"
           />
+          <Select
+            label=""
+            options={[
+              { value: "", label: "Qualquer prazo" },
+              { value: "today", label: "Vence hoje" },
+              { value: "week", label: "Esta semana" },
+            ]}
+            value={filterWhen}
+            onChange={(e) => setFilterWhen(e.target.value as "" | "today" | "week")}
+            className="!py-1.5 min-w-[140px]"
+          />
           <Button onClick={handleNew}>+ Nova Tarefa</Button>
           <Button variant="secondary" onClick={handleNewSection}>+ Seção</Button>
         </div>
@@ -261,7 +322,7 @@ export function Tasks() {
         {!isLoading && filteredTasks.length === 0 && (
           <Card className="p-8 text-center">
             <p className="text-text-muted text-sm">
-              {search || filterStatus || filterSection || filterProject
+              {search || filterStatus || filterSection || filterProject || filterWhen
                 ? "Nenhuma tarefa encontrada."
                 : "Nenhuma tarefa cadastrada."}
             </p>
@@ -284,6 +345,22 @@ export function Tasks() {
                 </h3>
                 {sectionId && (
                   <div className="flex gap-1">
+                    <button
+                      onClick={() => handleMoveSection(sectionId, "up")}
+                      aria-label={`Mover seção ${getSectionName(sectionId)} para cima`}
+                      title="Mover para cima"
+                      className="text-xs text-text-muted hover:text-primary-600 p-1"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => handleMoveSection(sectionId, "down")}
+                      aria-label={`Mover seção ${getSectionName(sectionId)} para baixo`}
+                      title="Mover para baixo"
+                      className="text-xs text-text-muted hover:text-primary-600 p-1"
+                    >
+                      ↓
+                    </button>
                     <button
                       onClick={() => {
                         const section = sections?.find((s) => s.id === sectionId);
