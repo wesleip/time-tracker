@@ -45,6 +45,14 @@ REGISTRY ?= ghcr.io/wesleip/time-tracker
 # Internal env block passed to every bake invocation
 BAKE_ENV = APP_VERSION=$(APP_VERSION) VCS_REF=$(VCS_REF) BUILD_DATE=$(BUILD_DATE) REGISTRY=$(REGISTRY)
 
+# Compose file sets.
+# compose.api.yml e compose.frontend.yml são autossuficientes (criam rede/volume
+# se preciso), mas a API stack usa compose.yml para o Postgres compartilhado.
+# compose.yaml é a stack de produção (sem portas publicadas) e não entra aqui.
+COMPOSE_FULL = docker compose -f compose.yml -f compose.api.yml -f compose.frontend.yml
+COMPOSE_API = docker compose -f compose.yml -f compose.api.yml
+COMPOSE_FRONTEND = docker compose -f compose.frontend.yml
+
 .DEFAULT_GOAL := build
 .PHONY: build build-api build-frontend push push-api push-frontend up up-api up-frontend down down-api down-frontend test clean info
 
@@ -88,49 +96,49 @@ push-frontend:
 # up — start full stack (DB + API + Frontend + Caddy)
 # ──────────────────────────────────────────────────────────────
 up: down
-	docker compose -f compose.yml -f compose.api.yml -f compose.frontend-full.yml up -d
+	$(COMPOSE_FULL) up -d
 
 # ──────────────────────────────────────────────────────────────
 # up-api — start API stack only (DB + API)
 # ──────────────────────────────────────────────────────────────
 up-api: down-api
-	docker compose -f compose.yml -f compose.api.yml up -d
+	$(COMPOSE_API) up -d
 
 # ──────────────────────────────────────────────────────────────
 # up-frontend — start frontend stack only (requires running API)
 # ──────────────────────────────────────────────────────────────
 up-frontend: down-frontend
-	docker compose -f compose.yml -f compose.frontend.yml up -d
+	$(COMPOSE_FRONTEND) up -d
 
 # ──────────────────────────────────────────────────────────────
 # down — stop all services
 # ──────────────────────────────────────────────────────────────
 down:
-	docker compose -f compose.yml -f compose.api.yml -f compose.frontend.yml down
+	$(COMPOSE_FULL) down
 
 # ──────────────────────────────────────────────────────────────
 # down-api — stop API stack
 # ──────────────────────────────────────────────────────────────
 down-api:
-	docker compose -f compose.api.yml down || true
+	$(COMPOSE_API) down || true
 
 # ──────────────────────────────────────────────────────────────
 # down-frontend — stop frontend stack
 # ──────────────────────────────────────────────────────────────
 down-frontend:
-	docker compose -f compose.frontend.yml down || true
+	$(COMPOSE_FRONTEND) down || true
 
 # ──────────────────────────────────────────────────────────────
 # restart — restart a specific service (e.g., make restart SERVICE=api)
 # ──────────────────────────────────────────────────────────────
 restart:
-	@docker compose -f compose.yml -f compose.api.yml -f compose.frontend.yml restart $(SERVICE)
+	@$(COMPOSE_FULL) restart $(SERVICE)
 
 # ──────────────────────────────────────────────────────────────
 # logs — follow logs for a specific service or all
 # ──────────────────────────────────────────────────────────────
 logs:
-	@docker compose -f compose.yml -f compose.api.yml -f compose.frontend.yml logs -f $(SERVICE)
+	@$(COMPOSE_FULL) logs -f $(SERVICE)
 
 # ──────────────────────────────────────────────────────────────
 # test — run the backend test suite with pytest.
