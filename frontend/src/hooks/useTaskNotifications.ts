@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { useTasks } from "./useTasks";
 
 export function useTaskNotifications() {
-  const { data: tasks = [], isLoading } = useTasks({ status: "pending" });
+  const { data, isLoading } = useTasks({ status: "pending" });
+  const tasks = useMemo(() => data?.items ?? [], [data]);
 
   const notifications = useMemo(() => {
     const now = new Date();

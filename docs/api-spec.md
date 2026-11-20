@@ -28,6 +28,7 @@ O token vem de `POST /auth/login`. Cada usuário só enxerga os próprios dados 
 | Cor de projeto | string hex (`#6366f1`), não enum |
 | `hours` | float, `0 < hours <= 24`, arredondado a 2 casas |
 | Coleções | barra final obrigatória: `/projects/`, `/entries/` |
+| Paginação | `limit` (1–200) e `offset` (≥0) em `/tasks/` e `/entries/`. Sem `limit`, a rota devolve tudo (compatibilidade). O total da consulta vem no header `X-Total-Count` |
 
 ## Rotas
 
@@ -56,7 +57,7 @@ O token vem de `POST /auth/login`. Cada usuário só enxerga os próprios dados 
 
 | Método | Rota | Query params | Descrição |
 |---|---|---|---|
-| `GET` | `/entries/` | `date`, `project_id` | Listar (inclui `project_name` e `project_color`) |
+| `GET` | `/entries/` | `date`, `project_id`, `limit`, `offset` | Listar (inclui `project_name` e `project_color`) |
 | `POST` | `/entries/` | — | Criar |
 | `GET`/`PUT`/`DELETE` | `/entries/{id}` | — | Detalhar / atualizar / remover |
 
@@ -72,7 +73,7 @@ O token vem de `POST /auth/login`. Cada usuário só enxerga os próprios dados 
 
 | Método | Rota | Descrição |
 |---|---|---|
-| `GET`/`POST` | `/tasks/` | Listar (filtros: status, section_id, due_date, search) / criar |
+| `GET`/`POST` | `/tasks/` | Listar (filtros: status, section_id, due_date, search, project_id, `limit`, `offset`) / criar |
 | `GET`/`PUT`/`DELETE` | `/tasks/{id}` | Detalhar / atualizar / remover |
 | `PATCH` | `/tasks/{id}/toggle` | Alterna pendente/concluída |
 | `PATCH` | `/tasks/{id}/complete` | Conclui e gera a próxima ocorrência se recorrente |

@@ -9,16 +9,23 @@ interface TaskFilters {
   projectId?: string;
 }
 
-export async function fetchTasks(filters?: TaskFilters): Promise<Task[]> {
+export interface TaskPage {
+  items: Task[];
+  total: number;
+}
+
+export async function fetchTasks(filters?: TaskFilters, pagination?: { limit?: number; offset?: number }): Promise<TaskPage> {
   const params = new URLSearchParams();
   if (filters?.status) params.append("status", filters.status);
   if (filters?.sectionId) params.append("section_id", filters.sectionId);
   if (filters?.dueDate) params.append("due_date", filters.dueDate);
   if (filters?.search) params.append("search", filters.search);
   if (filters?.projectId) params.append("project_id", filters.projectId);
+  if (pagination?.limit) params.append("limit", String(pagination.limit));
+  if (pagination?.offset) params.append("offset", String(pagination.offset));
 
-  const { data } = await api.get<Task[]>(`/tasks/?${params.toString()}`);
-  return data;
+  const { data, headers } = await api.get<Task[]>(`/tasks/?${params.toString()}`);
+  return { items: data, total: Number(headers["x-total-count"] ?? data.length) };
 }
 
 export async function createTask(data: {

@@ -68,6 +68,8 @@ function isDueToday(dateStr: string | null): boolean {
   if (!dateStr) return false;
   return dateStr === toISODate(new Date());
 }
+const PAGE_SIZE = 50;
+
 const priorityColors: Record<number, string> = {
   1: "bg-red-100 text-red-700 border-red-200",
   2: "bg-orange-100 text-orange-700 border-orange-200",
@@ -95,13 +97,27 @@ export function Tasks() {
   const [sectionModalOpen, setSectionModalOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
   const [suggestedTask, setSuggestedTask] = useState<Task | null>(null);
+  const [limit, setLimit] = useState(PAGE_SIZE);
 
-  const { data: tasks, isLoading } = useTasks({
-    status: filterStatus || undefined,
-    sectionId: filterSection || undefined,
-    projectId: filterProject || undefined,
-    search: search || undefined,
-  });
+  // Trocar de filtro volta para a primeira página (ajuste de estado durante o render).
+  const filterKey = `${filterStatus}|${filterSection}|${filterProject}|${filterWhen}|${search}`;
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+  if (filterKey !== lastFilterKey) {
+    setLastFilterKey(filterKey);
+    setLimit(PAGE_SIZE);
+  }
+
+  const { data: taskPage, isLoading, isFetching } = useTasks(
+    {
+      status: filterStatus || undefined,
+      sectionId: filterSection || undefined,
+      projectId: filterProject || undefined,
+      search: search || undefined,
+    },
+    { limit }
+  );
+  const tasks = useMemo(() => taskPage?.items ?? [], [taskPage]);
+  const totalTasks = taskPage?.total ?? 0;
   const { data: sections } = useSections();
   const { data: projects } = useProjects();
 
@@ -479,6 +495,21 @@ export function Tasks() {
             </div>
           ))}
         </div>
+
+        {tasks.length < totalTasks && (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xs text-text-muted">
+              Mostrando {tasks.length} de {totalTasks}
+            </p>
+            <Button
+              variant="secondary"
+              onClick={() => setLimit((current) => current + PAGE_SIZE)}
+              disabled={isFetching}
+            >
+              {isFetching ? "Carregando..." : "Carregar mais"}
+            </Button>
+          </div>
+        )}
 
         <Modal open={modalOpen} title={editingTask ? "Editar Tarefa" : "Nova Tarefa"} onClose={() => setModalOpen(false)}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -14,12 +14,12 @@ class EntryRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def list_all(
+    def _filtered_query(
         self,
         user_id: str,
         entry_date: datetime | None = None,
         project_id: str | None = None,
-    ) -> list[TimeEntry]:
+    ):
         query = self.db.query(TimeEntry).join(Project).filter(Project.user_id == user_id)
         if entry_date:
             if entry_date.tzinfo is None:
@@ -29,7 +29,30 @@ class EntryRepository:
             query = query.filter(TimeEntry.date >= start, TimeEntry.date <= end)
         if project_id:
             query = query.filter(TimeEntry.project_id == project_id)
-        return query.order_by(TimeEntry.date.desc()).all()
+        return query
+
+    def list_all(
+        self,
+        user_id: str,
+        entry_date: datetime | None = None,
+        project_id: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[TimeEntry]:
+        query = self._filtered_query(user_id, entry_date, project_id).order_by(TimeEntry.date.desc())
+        if offset:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+        return query.all()
+
+    def count_all(
+        self,
+        user_id: str,
+        entry_date: datetime | None = None,
+        project_id: str | None = None,
+    ) -> int:
+        return self._filtered_query(user_id, entry_date, project_id).count()
 
     def get_by_id(self, entry_id: str, user_id: str) -> TimeEntry | None:
         return (

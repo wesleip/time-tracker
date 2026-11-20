@@ -30,6 +30,7 @@
 - [x] Sugerir registro de tempo ao concluir tarefa com projeto
 - [x] Reordenação de seções e navegação rápida de data na tela de Tarefas
 - [x] Seções vazias visíveis na lista de tarefas
+- [x] Paginação de registros e tarefas (`limit`/`offset` + header `X-Total-Count`)
 - [x] Testes frontend (Vitest): datas locais, filtro de prazo e componentes de UI
 
 ## Futuro
@@ -40,4 +41,3 @@
 - [ ] Integração Jira
 - [ ] Integração Azure DevOps
 - [ ] Refresh token
-- [ ] Paginação de registros

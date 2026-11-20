@@ -60,6 +60,40 @@ def test_list_entries_by_date(client, auth_headers):
     assert len(response.json()) == 1
 
 
+def test_list_entries_pagination(client, auth_headers):
+    project_id = setup_project(client, auth_headers)
+    for i in range(3):
+        client.post("/api/entries/", json={
+            "project_id": project_id, "hours": 1.0, "date": f"2026-06-0{i + 1}T12:00:00",
+        }, headers=auth_headers)
+
+    page = client.get("/api/entries/", params={"limit": 2}, headers=auth_headers)
+    assert page.status_code == 200
+    assert len(page.json()) == 2
+    assert page.headers["X-Total-Count"] == "3"
+
+    rest = client.get("/api/entries/", params={"limit": 2, "offset": 2}, headers=auth_headers)
+    assert len(rest.json()) == 1
+    assert rest.headers["X-Total-Count"] == "3"
+
+
+def test_list_entries_without_limit_returns_all(client, auth_headers):
+    project_id = setup_project(client, auth_headers)
+    for i in range(3):
+        client.post("/api/entries/", json={
+            "project_id": project_id, "hours": 1.0, "date": f"2026-06-0{i + 1}T12:00:00",
+        }, headers=auth_headers)
+
+    response = client.get("/api/entries/", headers=auth_headers)
+    assert len(response.json()) == 3
+    assert response.headers["X-Total-Count"] == "3"
+
+
+def test_list_entries_rejects_invalid_pagination(client, auth_headers):
+    assert client.get("/api/entries/", params={"limit": 0}, headers=auth_headers).status_code == 422
+    assert client.get("/api/entries/", params={"limit": 500}, headers=auth_headers).status_code == 422
+
+
 def test_delete_entry(client, auth_headers):
     project_id = setup_project(client, auth_headers)
     entry_id = client.post("/api/entries/", json={
