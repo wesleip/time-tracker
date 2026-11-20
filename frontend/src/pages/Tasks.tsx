@@ -10,6 +10,7 @@ import { Select } from "../components/ui/Select";
 import { Modal } from "../components/ui/Modal";
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useToggleTask } from "../hooks/useTasks";
 import { useSections, useCreateSection, useUpdateSection, useDeleteSection } from "../hooks/useSections";
+import { useProjects } from "../hooks/useProjects";
 import type { Task, Section, TaskStatus } from "../types";
 
 const taskSchema = z.object({
@@ -74,6 +75,7 @@ const priorityColors: Record<number, string> = {
 export function Tasks() {
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "">("");
   const [filterSection, setFilterSection] = useState<string>("");
+  const [filterProject, setFilterProject] = useState<string>("");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -84,9 +86,11 @@ export function Tasks() {
   const { data: tasks, isLoading } = useTasks({
     status: filterStatus || undefined,
     sectionId: filterSection || undefined,
+    projectId: filterProject || undefined,
     search: search || undefined,
   });
   const { data: sections } = useSections();
+  const { data: projects } = useProjects();
 
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -99,7 +103,7 @@ export function Tasks() {
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<TaskForm>({
     resolver: zodResolver(taskSchema),
-    defaultValues: { title: "", description: "", priority: 3, dueDate: "", recurrence: "", sectionId: "" },
+    defaultValues: { title: "", description: "", priority: 3, dueDate: "", recurrence: "", sectionId: "", projectId: "" },
   });
 
   const { register: registerSection, handleSubmit: handleSubmitSection, reset: resetSection, formState: { errors: sectionErrors, isSubmitting: isSubmittingSection } } = useForm({
@@ -130,9 +134,13 @@ export function Tasks() {
     return sections?.find((s) => s.id === sectionId)?.name ?? "Seção";
   }
 
+  function projectById(projectId: string) {
+    return projects?.find((p) => p.id === projectId);
+  }
+
   function handleNew() {
     setEditingTask(null);
-    reset({ title: "", description: "", priority: 3, dueDate: "", recurrence: "", sectionId: "" });
+    reset({ title: "", description: "", priority: 3, dueDate: "", recurrence: "", sectionId: "", projectId: "" });
     setModalOpen(true);
   }
 
@@ -145,6 +153,7 @@ export function Tasks() {
       dueDate: task.dueDate ?? "",
       recurrence: task.recurrence ?? "",
       sectionId: task.sectionId ?? "",
+      projectId: task.projectId ?? "",
     });
     setModalOpen(true);
   }
@@ -157,6 +166,7 @@ export function Tasks() {
       dueDate: data.dueDate || undefined,
       recurrence: data.recurrence || undefined,
       sectionId: data.sectionId || undefined,
+      projectId: data.projectId || undefined,
     };
 
     if (editingTask) {
@@ -232,6 +242,16 @@ export function Tasks() {
             onChange={(e) => setFilterSection(e.target.value)}
             className="!py-1.5 min-w-[140px]"
           />
+          <Select
+            label=""
+            options={[
+              { value: "", label: "Todos os projetos" },
+              ...(projects?.map((p) => ({ value: p.id, label: p.name })) ?? []),
+            ]}
+            value={filterProject}
+            onChange={(e) => setFilterProject(e.target.value)}
+            className="!py-1.5 min-w-[140px]"
+          />
           <Button onClick={handleNew}>+ Nova Tarefa</Button>
           <Button variant="secondary" onClick={handleNewSection}>+ Seção</Button>
         </div>
@@ -241,7 +261,7 @@ export function Tasks() {
         {!isLoading && filteredTasks.length === 0 && (
           <Card className="p-8 text-center">
             <p className="text-text-muted text-sm">
-              {search || filterStatus || filterSection
+              {search || filterStatus || filterSection || filterProject
                 ? "Nenhuma tarefa encontrada."
                 : "Nenhuma tarefa cadastrada."}
             </p>
@@ -323,6 +343,15 @@ export function Tasks() {
                             }`}>
                               {formatDate(task.dueDate)}
                               {isOverdue(task.dueDate) && task.status !== "completed" && " (atrasada)"}
+                            </span>
+                          )}
+                          {task.projectId && projectById(task.projectId) && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-primary-50 text-primary-700 border border-primary-100 inline-flex items-center gap-1.5">
+                              <span
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: projectById(task.projectId)?.color }}
+                              />
+                              {projectById(task.projectId)?.name}
                             </span>
                           )}
                         </div>
@@ -413,6 +442,16 @@ export function Tasks() {
                   ...(sections?.map((s) => ({ value: s.id, label: s.name })) ?? []),
                 ]}
                 {...register("sectionId")}
+              />
+            </div>
+            <div>
+              <Select
+                label="Projeto"
+                options={[
+                  { value: "", label: "Sem projeto" },
+                  ...(projects?.map((p) => ({ value: p.id, label: p.name })) ?? []),
+                ]}
+                {...register("projectId")}
               />
             </div>
             <div className="flex justify-end gap-3 pt-2">

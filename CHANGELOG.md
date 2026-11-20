@@ -10,6 +10,7 @@
 - Seção padrão "Geral" criada automaticamente na primeira listagem/criação
 - Prioridade 1–4 com cor e ordenação (urgente → baixa, concluídas ao final)
 - Página Tarefas com filtros de status e seção, busca e destaque de atrasadas / vence hoje
+- Vínculo opcional de tarefa com projeto: seletor no formulário, filtro por projeto na listagem e badge do projeto no card
 
 ### Notificações
 
