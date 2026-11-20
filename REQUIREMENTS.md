@@ -1,5 +1,7 @@
 # Requisitos — Sistema de Tarefas
 
+> **Escopo deste documento:** apenas o módulo de Tarefas (tasks, seções, recorrência, prioridade e lembretes). Não é o requisito geral da aplicação. Autenticação, projetos, registros de horas, relatórios e admin estão descritos no `README.md`.
+
 ## Visão Geral
 
 Sistema de gerenciamento de tarefas pessoais (todo list) inspirado em Todoist e Microsoft ToDo, com foco em simplicidade e produtividade. Integra-se ao time tracker existente, permitindo que usuários gerenciem suas tarefas diárias sem sair da aplicação.
