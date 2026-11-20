@@ -13,6 +13,7 @@
 - Vínculo opcional de tarefa com projeto: seletor no formulário, filtro por projeto na listagem e badge do projeto no card
 - Filtros rápidos por prazo: "Hoje", "Amanhã", "Esta semana" (segunda–domingo) e "Próxima semana"
 - Reordenação de seções com botões ↑/↓ na tela de Tarefas; os grupos passam a seguir a ordem configurada das seções ("Sem seção" por último)
+- Seções sem tarefas passam a aparecer na lista (quando não há filtro ativo), para poderem ser reordenadas, editadas ou excluídas — antes só apareciam as seções que tinham tarefas
 - Ao concluir uma tarefa com projeto vinculado, a aplicação sugere registrar as horas: modal com horas, data (vencimento da tarefa ou hoje) e descrição (título da tarefa), usando `POST /entries/`. Fechar o modal não registra nada
 - Concluir tarefa pela tela passa a chamar `PATCH /tasks/{id}/complete` em vez de `/toggle`: só o endpoint de conclusão processa a recorrência, que portanto não funcionava pela interface. Reabrir continua usando `/toggle`
 - `toISODate`/`todayISO` movidos para `src/utils/date.ts` e reaproveitados pela tela de Tarefas

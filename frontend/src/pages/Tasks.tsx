@@ -158,6 +158,8 @@ export function Tasks() {
     });
   }, [tasks, filterWhen]);
 
+  const hasActiveFilter = !!(search || filterStatus || filterSection || filterProject || filterWhen);
+
   const tasksBySection = useMemo(() => {
     const map = new Map<string | null, Task[]>();
     filteredTasks.forEach((task) => {
@@ -165,13 +167,20 @@ export function Tasks() {
       if (!map.has(sectionId)) map.set(sectionId, []);
       map.get(sectionId)!.push(task);
     });
+    // Seções sem tarefas aparecem na lista quando não há filtro ativo, para
+    // poderem ser reordenadas, editadas ou excluídas.
+    if (!hasActiveFilter && sections) {
+      for (const section of sections) {
+        if (!map.has(section.id)) map.set(section.id, []);
+      }
+    }
     // Grupos na ordem configurada das seções ("Sem seção" por último).
     const orderOf = (sectionId: string | null) =>
       sectionId ? sections?.find((s) => s.id === sectionId)?.order ?? Number.MAX_SAFE_INTEGER : Number.MAX_SAFE_INTEGER;
     return new Map(
       [...map.entries()].sort(([a], [b]) => orderOf(a) - orderOf(b))
     );
-  }, [filteredTasks, sections]);
+  }, [filteredTasks, sections, hasActiveFilter]);
 
   function getSectionName(sectionId: string | null): string {
     if (!sectionId) return "Sem seção";
