@@ -29,6 +29,11 @@
 - 22 novos testes: tarefas (CRUD, filtros, recorrência, isolamento), seções (incluindo cascade nas tarefas), notificações (contador, leitura, isolamento) e smoke do admin
 - Suite backend passa de 18 para 40 testes
 
+### Segurança
+
+- `JWT_SECRET` passa a ser obrigatório: removido o fallback `"change-this-secret-in-production"` de `app/core/config.py`. Sem a variável, a API falha na inicialização em vez de assinar tokens com segredo público
+- `conftest.py` define `JWT_SECRET` de teste antes de carregar as settings; CI já fornecia a variável
+
 ### Documentação
 
 - `ARCHITECTURE.md`, `docs/api-spec.md`, `docs/glossary.md` e `README.md` sincronizados com o código
