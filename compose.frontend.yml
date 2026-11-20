@@ -1,12 +1,14 @@
 # compose.frontend.yml — Frontend stack (React SPA + Caddy)
 #
-# Includes: Frontend + Caddy services
+# Includes: Frontend + Caddy. Não depende da API para iniciar; o Nginx faz
+# proxy de /api em tempo de request.
 #
 # Usage:
-#   docker compose -f compose.yml -f compose.frontend.yml up -d           # Full frontend stack
-#   docker compose -f compose.frontend.yml up -d                           # Standalone (no API dep)
-#   docker compose -f compose.frontend.yml build                            # Build frontend only
-#   docker compose -f compose.frontend.yml up -d --no-deps frontend         # Restart frontend only
+#   docker compose -f compose.yml -f compose.frontend.yml up -d   # Frontend + Caddy
+#   docker compose -f compose.frontend.yml up -d                  # autossuficiente (cria rede)
+#   docker compose -f compose.frontend.yml up -d --no-deps frontend  # reinicia só o frontend
+#
+# Não usa `profiles`: incluí-lo no -f já significa subir a stack.
 
 services:
   frontend:
@@ -19,6 +21,9 @@ services:
     image: time-tracker-frontend:latest
     container_name: time-tracker-frontend
     restart: unless-stopped
+    ports:
+      # Dev stack only — produção usa compose.yaml (sem portas publicadas).
+      - "8080:80"
     healthcheck:
       test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:80/ || exit 1"]
       interval: 10s
@@ -39,9 +44,6 @@ services:
       - SETGID
       - CHOWN
       - DAC_OVERRIDE
-    profiles:
-      - frontend
-      - full
 
   caddy:
     image: caddy:2-alpine
@@ -71,14 +73,11 @@ services:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
-    profiles:
-      - frontend
-      - full
 
 networks:
   time-tracker-net:
-    external: true
     name: time-tracker-network
+    driver: bridge
 
 volumes:
   caddy_data:

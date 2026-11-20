@@ -67,9 +67,8 @@ Profissionais que atuam em múltiplos projetos (SRE, DevOps, desenvolvedores, co
 ├── TASKS.md
 ├── CHANGELOG.md
 ├── compose.yml                # Base infrastructure (DB, networks, volumes)
-├── compose.api.yml            # API stack (DB + API)
-├── compose.frontend.yml       # Frontend stack (Frontend + Caddy)
-├── compose.frontend-full.yml  # Frontend with API dependency (full stack)
+├── compose.api.yml            # API stack (DB + API, porta 3001 em dev)
+├── compose.frontend.yml       # Frontend stack (Frontend + Caddy, porta 8080 em dev)
 ├── Caddyfile                  # Reverse proxy: HTTPS automático + security headers
 └── .env.example               # Template de variáveis de ambiente
 ```
@@ -237,8 +236,10 @@ docker compose -f compose.yml -f compose.api.yml up -d
 docker compose -f compose.yml -f compose.frontend.yml up -d
 
 # Full stack with compose files
-docker compose -f compose.yml -f compose.api.yml -f compose.frontend-full.yml up -d
+docker compose -f compose.yml -f compose.api.yml -f compose.frontend.yml up -d
 ```
+
+`compose.api.yml` e `compose.frontend.yml` são autossuficientes (criam rede e volume se necessário) e publicam as portas 3001/8080 para desenvolvimento. **Produção usa `compose.yaml`**, que não publica portas nem liga `DEBUG`.
 
 ### Makefile targets
 

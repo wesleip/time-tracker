@@ -1,12 +1,14 @@
 # compose.api.yml — API stack (FastAPI backend)
 #
-# Includes: API service only (DB comes from compose.yml)
+# Includes: API service + DB (extends compose.yml)
 #
 # Usage:
-#   docker compose -f compose.yml -f compose.api.yml up -d      # Full API stack
-#   docker compose -f compose.api.yml up -d                      # API with inline DB
-#   docker compose -f compose.api.yml build                      # Build API only
-#   docker compose -f compose.api.yml up -d --no-deps api        # Restart API only
+#   docker compose -f compose.yml -f compose.api.yml up -d            # API + DB
+#   docker compose -f compose.yml -f compose.api.yml -f compose.dev.yaml up -d  # + portas de dev
+#   docker compose -f compose.api.yml up -d                           # autossuficiente (cria rede e volume)
+#   docker compose -f compose.api.yml up -d --no-deps api             # reinicia só a API
+#
+# Não usa `profiles`: incluí-lo no -f já significa subir a stack.
 
 services:
   api:
@@ -18,6 +20,9 @@ services:
     image: time-tracker-api:latest
     container_name: time-tracker-api
     restart: unless-stopped
+    ports:
+      # Dev stack only — produção usa compose.yaml (sem portas publicadas).
+      - "3001:3001"
     environment:
       TZ: America/Sao_Paulo
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
@@ -40,24 +45,17 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    profiles:
-      - api
-      - full
 
   db:
     extends:
       file: compose.yml
       service: db
-    profiles:
-      - api
-      - full
 
 networks:
   time-tracker-net:
-    external: true
     name: time-tracker-network
+    driver: bridge
 
 volumes:
   pgdata:
-    external: true
     name: time-tracker-pgdata

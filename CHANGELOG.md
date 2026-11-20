@@ -29,6 +29,15 @@
 - 22 novos testes: tarefas (CRUD, filtros, recorrência, isolamento), seções (incluindo cascade nas tarefas), notificações (contador, leitura, isolamento) e smoke do admin
 - Suite backend passa de 18 para 40 testes
 
+### Infra
+
+- `compose.api.yml` e `compose.frontend.yml` sem `profiles:`: incluir o arquivo no `-f` passa a subir a stack (antes qualquer `docker compose up` sem `--profile` subia só o `db`)
+- Rede e volume definidos de forma idêntica nos três arquivos — fim do `external: true` que exigia criar `time-tracker-network`/`time-tracker-pgdata` à mão
+- `compose.frontend-full.yml` removido: só adicionava `depends_on`, que não é necessário (Nginx resolve `/api` em tempo de request)
+- `compose.override.yaml` removido: como o Compose carrega `compose.override.yaml` automaticamente, o deploy de produção (`docker compose -f compose.yaml up -d`) recebia `DEBUG=true` e as portas 3001/8080 sem querer. As portas de dev agora ficam em `compose.api.yml`/`compose.frontend.yml`, que são stacks de desenvolvimento; produção continua em `compose.yaml`
+- `make up`, `down`, `up-api`, `down-api`, `up-frontend`, `restart` e `logs` usam o mesmo conjunto de arquivos de cada stack
+- `frontend/nginx.conf`: upstream do `/api` resolvido em tempo de request (`resolver 127.0.0.11` + `proxy_pass` com variável). Antes, subir o frontend sem a API no mesmo network matava o container com `host not found in upstream`
+
 ### Segurança
 
 - `JWT_SECRET` passa a ser obrigatório: removido o fallback `"change-this-secret-in-production"` de `app/core/config.py`. Sem a variável, a API falha na inicialização em vez de assinar tokens com segredo público
