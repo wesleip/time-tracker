@@ -27,6 +27,9 @@
 - [x] Recorrência de tarefas (diária, semanal, mensal)
 - [x] Notificações de tarefas vencidas / do dia
 - [x] Painel administrativo (usuários, projetos, registros)
+- [x] Sugerir registro de tempo ao concluir tarefa com projeto
+- [x] Reordenação de seções e navegação rápida de data na tela de Tarefas
+- [x] Seções vazias visíveis na lista de tarefas
 
 ## Futuro
 
@@ -35,7 +38,6 @@
 - [ ] Timesheet automático
 - [ ] Integração Jira
 - [ ] Integração Azure DevOps
-- [ ] Sugerir registro de tempo ao concluir tarefa com projeto
 - [ ] Testes frontend (Vitest)
 - [ ] Refresh token
 - [ ] Paginação de registros
